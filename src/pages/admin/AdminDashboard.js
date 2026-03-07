@@ -1,114 +1,65 @@
-import MessageIcon from '@mui/icons-material/Message';
 import React from 'react';
-import { Grid, Card, CardContent, Typography, Box, Avatar, LinearProgress } from '@mui/material';
+import { Typography, Box, Card, CardContent, Grid, Chip } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import SchoolIcon from '@mui/icons-material/School';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import AssignmentIcon from '@mui/icons-material/Assignment';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import Layout from '../../components/layout/Layout';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import PersonIcon from '@mui/icons-material/Person';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import BarChartIcon from '@mui/icons-material/BarChart';
+import { adminMenu } from '../../components/layout/menus';
 
-const menuItems = [
-  { text: 'Dashboard', path: '/admin', icon: <DashboardIcon /> },
-  { text: 'Students', path: '/admin/students', icon: <SchoolIcon /> },
-  { text: 'Staff & HR', path: '/admin/staff', icon: <PeopleIcon /> },
-  { text: 'Fee Management', path: '/admin/fees', icon: <AttachMoneyIcon /> },
-  { text: 'Admissions', path: '/admin/admissions', icon: <AssignmentIcon /> },
-  { text: 'Calendar', path: '/admin/calendar', icon: <CalendarMonthIcon /> },
-  { text: 'Messages', path: '/admin/messages', icon: <MessageIcon /> },
-  { text: 'Reports', path: '/admin/reports', icon: <BarChartIcon /> },
+const stats = [
+  { label: 'Total Students', value: '1,240', icon: <SchoolIcon />, color: '#1a73e8', bg: '#e8f0fe' },
+  { label: 'Total Staff', value: '86', icon: <PeopleIcon />, color: '#34a853', bg: '#e6f4ea' },
+  { label: 'Fee Collected', value: '₹12.4L', icon: <AttachMoneyIcon />, color: '#fbbc04', bg: '#fef9e7' },
+  { label: 'Attendance', value: '94%', icon: <TrendingUpIcon />, color: '#ea4335', bg: '#fce8e6' },
 ];
 
-const StatCard = ({ title, value, icon, color, subtitle, progress }) => (
-  <Card sx={{ borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', height: '100%' }}>
-    <CardContent sx={{ p: 3 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-        <Box>
-          <Typography variant="body2" color="text.secondary" fontWeight={500}>{title}</Typography>
-          <Typography variant="h4" fontWeight={700} mt={1} color="text.primary">{value}</Typography>
-          {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
-        </Box>
-        <Avatar sx={{ bgcolor: `${color}20`, width: 52, height: 52 }}>
-          {React.cloneElement(icon, { sx: { color, fontSize: 28 } })}
-        </Avatar>
-      </Box>
-      {progress !== undefined && (
-        <Box mt={2}>
-          <LinearProgress variant="determinate" value={progress}
-            sx={{ height: 6, borderRadius: 3, bgcolor: `${color}20`, '& .MuiLinearProgress-bar': { bgcolor: color } }} />
-          <Typography variant="caption" color="text.secondary" mt={0.5} display="block">{progress}% of target</Typography>
-        </Box>
-      )}
-    </CardContent>
-  </Card>
-);
+const recentActivities = [
+  { text: '12 new admission applications received', time: '2 hours ago', color: '#1a73e8' },
+  { text: 'Fee payment received from Class 10A', time: '3 hours ago', color: '#34a853' },
+  { text: 'Staff meeting scheduled for Friday 3PM', time: '5 hours ago', color: '#fbbc04' },
+  { text: 'Exam timetable published for Grade 9-10', time: 'Yesterday', color: '#ea4335' },
+  { text: 'Annual Sports Day confirmed for March 15', time: 'Yesterday', color: '#1a73e8' },
+];
 
 const AdminDashboard = () => {
   return (
-    <Layout menuItems={menuItems} title="Admin Dashboard">
-      <Typography variant="h5" fontWeight={700} mb={1}>Admin Dashboard</Typography>
-      <Typography variant="body2" color="text.secondary" mb={3}>
-        Welcome back! Here's what's happening at your school today.
-      </Typography>
+    <Layout menuItems={adminMenu}>
+      <Typography variant="h5" fontWeight={700} mb={1}>👋 Welcome, Admin!</Typography>
+      <Typography variant="body2" color="text.secondary" mb={3}>Here's what's happening at your school today.</Typography>
 
-      <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Students" value="1,247" icon={<SchoolIcon />}
-            color="#1a73e8" subtitle="+23 this month" progress={78} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Total Staff" value="89" icon={<PeopleIcon />}
-            color="#34a853" subtitle="12 departments" progress={92} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Fee Collection" value="₹8.4L" icon={<AttachMoneyIcon />}
-            color="#fbbc04" subtitle="This month" progress={65} />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="Avg Attendance" value="94.2%" icon={<AssignmentIcon />}
-            color="#ea4335" subtitle="This week" progress={94} />
-        </Grid>
+      <Grid container spacing={3} mb={3}>
+        {stats.map((stat) => (
+          <Grid item xs={12} sm={6} md={3} key={stat.label}>
+            <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ width: 52, height: 52, borderRadius: 2, bgcolor: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: stat.color }}>
+                  {stat.icon}
+                </Box>
+                <Box>
+                  <Typography variant="h5" fontWeight={700}>{stat.value}</Typography>
+                  <Typography variant="caption" color="text.secondary">{stat.label}</Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" fontWeight={600} mb={2}>📢 Recent Announcements</Typography>
-              {['Annual Sports Day - March 15th', 'Parent-Teacher Meeting - March 20th', 'Mid-term Exams - April 1st', 'School Picnic - April 10th'].map((item, i) => (
-                <Box key={i} sx={{ p: 1.5, mb: 1, bgcolor: '#f8f9fa', borderRadius: 2, borderLeft: '4px solid #1a73e8' }}>
-                  <Typography variant="body2">{item}</Typography>
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" fontWeight={600} mb={2}>📊 Class Performance Overview</Typography>
-              {[
-                { class: 'Class 10A', score: 87, color: '#1a73e8' },
-                { class: 'Class 9B', score: 79, color: '#34a853' },
-                { class: 'Class 8C', score: 92, color: '#fbbc04' },
-                { class: 'Class 7A', score: 74, color: '#ea4335' },
-              ].map((item) => (
-                <Box key={item.class} mb={2}>
-                  <Box display="flex" justifyContent="space-between" mb={0.5}>
-                    <Typography variant="body2" fontWeight={500}>{item.class}</Typography>
-                    <Typography variant="body2" fontWeight={700} color={item.color}>{item.score}%</Typography>
-                  </Box>
-                  <LinearProgress variant="determinate" value={item.score}
-                    sx={{ height: 8, borderRadius: 4, bgcolor: `${item.color}20`, '& .MuiLinearProgress-bar': { bgcolor: item.color } }} />
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight={700} mb={2}>📋 Recent Activity</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {recentActivities.map((activity, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: activity.color, flexShrink: 0 }} />
+                <Typography variant="body2" flexGrow={1}>{activity.text}</Typography>
+                <Typography variant="caption" color="text.secondary">{activity.time}</Typography>
+              </Box>
+            ))}
+          </Box>
+        </CardContent>
+      </Card>
     </Layout>
   );
 };

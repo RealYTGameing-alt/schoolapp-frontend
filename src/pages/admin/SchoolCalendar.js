@@ -1,120 +1,111 @@
-import adminMenuItems from '../../components/layout/adminMenu';
 import React, { useState } from 'react';
 import {
-  Card, CardContent, Typography, Box, Button, Chip, Grid,
+  Typography, Box, Card, CardContent, Chip, Button,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import Layout from '../../components/layout/Layout';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import PeopleIcon from '@mui/icons-material/People';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import SchoolIcon from '@mui/icons-material/School';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
-
-
-const eventColors = { holiday: '#ea4335', exam: '#1a73e8', event: '#34a853', meeting: '#fbbc04' };
+import { adminMenu } from '../../components/layout/menus';
 
 const initialEvents = [
-  { id: 1, title: 'Holi Holiday', date: '2026-03-14', type: 'holiday', desc: 'School closed for Holi' },
-  { id: 2, title: 'Mid-term Exams Begin', date: '2026-04-01', type: 'exam', desc: 'All classes' },
-  { id: 3, title: 'Annual Sports Day', date: '2026-03-15', type: 'event', desc: 'School ground, 9am onwards' },
-  { id: 4, title: 'Parent-Teacher Meeting', date: '2026-03-20', type: 'meeting', desc: 'All parents invited' },
-  { id: 5, title: 'Science Exhibition', date: '2026-03-25', type: 'event', desc: 'Classes 6-10' },
-  { id: 6, title: 'Ram Navami Holiday', date: '2026-04-06', type: 'holiday', desc: 'School closed' },
+  { id: 1, title: 'Holi Holiday', date: '2026-03-14', type: 'holiday', description: 'School closed for Holi' },
+  { id: 2, title: 'Annual Sports Day', date: '2026-03-15', type: 'event', description: 'School ground, 9am onwards' },
+  { id: 3, title: 'Parent-Teacher Meeting', date: '2026-03-20', type: 'meeting', description: 'All parents invited' },
+  { id: 4, title: 'Science Exhibition', date: '2026-03-25', type: 'event', description: 'Classes 6-10' },
+  { id: 5, title: 'Mid-term Exams Begin', date: '2026-04-01', type: 'exam', description: 'All classes' },
+  { id: 6, title: 'Mid-term Exams End', date: '2026-04-08', type: 'exam', description: 'All classes' },
 ];
 
-const SchoolCalendar = () => {
-  const [events, setEvents] = useState(initialEvents);
-  const [open, setOpen] = useState(false);
-  const { register, handleSubmit, reset } = useForm();
+const typeColors = {
+  holiday: '#ea4335', exam: '#1a73e8', event: '#34a853', meeting: '#fbbc04'
+};
 
-  const onSubmit = (data) => {
-    setEvents(prev => [...prev, { id: Date.now(), ...data }]);
-    toast.success('✅ Event added to calendar!');
-    setOpen(false);
-    reset();
-  };
-
-  const grouped = events.reduce((acc, event) => {
-    const month = event.date.slice(0, 7);
+const groupByMonth = (events) => {
+  return events.reduce((acc, event) => {
+    const month = new Date(event.date).toLocaleString('default', { month: 'long', year: 'numeric' });
     if (!acc[month]) acc[month] = [];
     acc[month].push(event);
     return acc;
   }, {});
+};
+
+const SchoolCalendar = () => {
+  const [events, setEvents] = useState(initialEvents);
+  const [open, setOpen] = useState(false);
+  const [newEvent, setNewEvent] = useState({ title: '', date: '', type: 'event', description: '' });
+
+  const grouped = groupByMonth(events);
+
+  const addEvent = () => {
+    setEvents(prev => [...prev, { ...newEvent, id: Date.now() }]);
+    setOpen(false);
+    setNewEvent({ title: '', date: '', type: 'event', description: '' });
+  };
 
   return (
-    <Layout menuItems={adminMenuItems}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Box>
-          <Typography variant="h5" fontWeight={700}>📅 School Calendar</Typography>
-          <Typography variant="body2" color="text.secondary">Events, holidays and important dates</Typography>
-        </Box>
+    <Layout menuItems={adminMenu}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" fontWeight={700}>📅 School Calendar</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpen(true)} sx={{ borderRadius: 2 }}>
           Add Event
         </Button>
       </Box>
 
-      <Grid container spacing={2} mb={3}>
-        {Object.entries(eventColors).map(([type, color]) => (
-          <Grid item key={type}>
-            <Chip label={type.charAt(0).toUpperCase() + type.slice(1)}
-              sx={{ bgcolor: `${color}20`, color, fontWeight: 600, borderRadius: 2 }} />
-          </Grid>
+      <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
+        {Object.entries(typeColors).map(([type, color]) => (
+          <Chip key={type} label={type.charAt(0).toUpperCase() + type.slice(1)}
+            sx={{ bgcolor: color + '22', color: color, fontWeight: 600, textTransform: 'capitalize' }} />
         ))}
-      </Grid>
+      </Box>
 
-      {Object.entries(grouped).sort().map(([month, monthEvents]) => (
-        <Card key={month} sx={{ borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', mb: 2 }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" fontWeight={600} mb={2}>
-              {new Date(month + '-01').toLocaleString('default', { month: 'long', year: 'numeric' })}
-            </Typography>
-            {monthEvents.sort((a, b) => a.date.localeCompare(b.date)).map((event) => (
-              <Box key={event.id} sx={{
-                display: 'flex', alignItems: 'center', gap: 2, p: 2, mb: 1.5,
-                bgcolor: `${eventColors[event.type]}10`, borderRadius: 2,
-                borderLeft: `4px solid ${eventColors[event.type]}`
-              }}>
-                <Box sx={{
-                  minWidth: 50, textAlign: 'center', p: 1, borderRadius: 2,
-                  bgcolor: `${eventColors[event.type]}20`
-                }}>
-                  <Typography variant="h6" fontWeight={700} color={eventColors[event.type]}>
-                    {new Date(event.date).getDate()}
-                  </Typography>
-                  <Typography variant="caption" color={eventColors[event.type]}>
-                    {new Date(event.date).toLocaleString('default', { weekday: 'short' })}
-                  </Typography>
-                </Box>
-                <Box flexGrow={1}>
-                  <Typography variant="body1" fontWeight={600}>{event.title}</Typography>
-                  <Typography variant="caption" color="text.secondary">{event.desc}</Typography>
-                </Box>
-                <Chip label={event.type} size="small"
-                  sx={{ bgcolor: `${eventColors[event.type]}20`, color: eventColors[event.type], fontWeight: 600 }} />
-              </Box>
-            ))}
-          </CardContent>
-        </Card>
+      {Object.entries(grouped).map(([month, monthEvents]) => (
+        <Box key={month} mb={3}>
+          <Typography variant="h6" fontWeight={700} mb={2}>{month}</Typography>
+          <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              {monthEvents.sort((a,b) => new Date(a.date) - new Date(b.date)).map((event, i) => {
+                const d = new Date(event.date);
+                const color = typeColors[event.type] || '#1a73e8';
+                return (
+                  <Box key={event.id} sx={{
+                    display: 'flex', alignItems: 'center', gap: 2, p: 2,
+                    borderLeft: `4px solid ${color}`, bgcolor: color + '11',
+                    borderRadius: 1, mb: i < monthEvents.length - 1 ? 1 : 0
+                  }}>
+                    <Box sx={{ textAlign: 'center', minWidth: 48, bgcolor: color, borderRadius: 2, p: 1, color: 'white' }}>
+                      <Typography variant="h6" fontWeight={700} lineHeight={1}>{d.getDate()}</Typography>
+                      <Typography variant="caption">{d.toLocaleString('default', { weekday: 'short' })}</Typography>
+                    </Box>
+                    <Box flexGrow={1}>
+                      <Typography variant="body1" fontWeight={600}>{event.title}</Typography>
+                      <Typography variant="caption" color="text.secondary">{event.description}</Typography>
+                    </Box>
+                    <Chip label={event.type} size="small" sx={{ bgcolor: color + '22', color: color }} />
+                  </Box>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </Box>
       ))}
 
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle fontWeight={700}>Add Calendar Event</DialogTitle>
-        <DialogContent>
-          <TextField fullWidth label="Event Title" margin="normal" {...register('title', { required: true })} />
-          <TextField fullWidth label="Date" type="date" margin="normal"
-            InputLabelProps={{ shrink: true }} {...register('date', { required: true })} />
-          <TextField fullWidth label="Type" margin="normal" {...register('type')}
-            placeholder="holiday / exam / event / meeting" />
-          <TextField fullWidth label="Description" margin="normal" multiline rows={2} {...register('desc')} />
+        <DialogTitle fontWeight={700}>➕ Add New Event</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+          <TextField label="Event Title" fullWidth value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} />
+          <TextField label="Date" type="date" fullWidth InputLabelProps={{ shrink: true }} value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} />
+          <TextField label="Type" select fullWidth value={newEvent.type} onChange={e => setNewEvent({...newEvent, type: e.target.value})}
+            SelectProps={{ native: true }}>
+            <option value="event">Event</option>
+            <option value="holiday">Holiday</option>
+            <option value="exam">Exam</option>
+            <option value="meeting">Meeting</option>
+          </TextField>
+          <TextField label="Description" fullWidth value={newEvent.description} onChange={e => setNewEvent({...newEvent, description: e.target.value})} />
         </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={() => setOpen(false)} sx={{ borderRadius: 2 }}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit(onSubmit)} sx={{ borderRadius: 2 }}>Add Event</Button>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={addEvent} disabled={!newEvent.title || !newEvent.date}>Add Event</Button>
         </DialogActions>
       </Dialog>
     </Layout>
