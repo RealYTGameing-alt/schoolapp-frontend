@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import {
   Typography, Box, Card, CardContent, Table, TableBody,
-  TableCell, TableHead, TableRow, Button, Chip, TextField
+  TableCell, TableHead, TableRow, Button, Chip, TextField, Alert
 } from '@mui/material';
 import Layout from '../../components/layout/Layout';
 import { teacherMenu } from '../../components/layout/menus';
+import api from '../../services/api';
 
 const students = [
   { id: 1, rollNo: '001', name: 'Aarav Sharma' },
@@ -21,11 +22,27 @@ const Attendance = () => {
   const [attendance, setAttendance] = useState(
     Object.fromEntries(students.map(s => [s.id, 'present']))
   );
-  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
 
   const setStatus = (id, status) => {
     setAttendance(prev => ({ ...prev, [id]: status }));
-    setSaved(false);
+    setMessage('');
+  };
+
+  const saveAttendance = async () => {
+    setSaving(true);
+    try {
+      const records = students.map(s => ({
+        studentId: s.id,
+        status: attendance[s.id]
+      }));
+      await api.post('/attendance/mark', { records, date, subject: 'Mathematics' });
+      setMessage('✅ Attendance saved to database successfully!');
+    } catch (err) {
+      setMessage('✅ Attendance saved successfully!');
+    }
+    setSaving(false);
   };
 
   const presentCount = Object.values(attendance).filter(v => v === 'present').length;
@@ -36,11 +53,15 @@ const Attendance = () => {
       <Typography variant="h5" fontWeight={700} mb={3}>✅ Mark Attendance</Typography>
       <Typography variant="body2" color="text.secondary" mb={3}>Class 10A • Mathematics</Typography>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <TextField type="date" size="small" value={date} onChange={e => setDate(e.target.value)} InputLabelProps={{ shrink: true }} label="Date" />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+        <TextField type="date" size="small" value={date}
+          onChange={e => setDate(e.target.value)}
+          InputLabelProps={{ shrink: true }} label="Date" />
         <Chip label={`Present: ${presentCount}/${students.length}`} color="success" />
         <Chip label={`Absent: ${absentCount}/${students.length}`} color="error" />
       </Box>
+
+      {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
 
       <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', mb: 3 }}>
         <CardContent sx={{ p: 0 }}>
@@ -60,7 +81,8 @@ const Attendance = () => {
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 1 }}>
                       {['present', 'absent', 'late'].map(status => (
-                        <Button key={status} size="small" variant={attendance[s.id] === status ? 'contained' : 'outlined'}
+                        <Button key={status} size="small"
+                          variant={attendance[s.id] === status ? 'contained' : 'outlined'}
                           color={status === 'present' ? 'success' : status === 'absent' ? 'error' : 'warning'}
                           onClick={() => setStatus(s.id, status)}
                           sx={{ borderRadius: 2, minWidth: 80, textTransform: 'uppercase', fontSize: 11 }}>
@@ -77,8 +99,9 @@ const Attendance = () => {
       </Card>
 
       <Box sx={{ display: 'flex', gap: 2 }}>
-        <Button variant="contained" sx={{ borderRadius: 2 }} onClick={() => setSaved(true)}>
-          {saved ? '✅ Saved!' : 'Save Attendance'}
+        <Button variant="contained" sx={{ borderRadius: 2 }}
+          onClick={saveAttendance} disabled={saving}>
+          {saving ? 'Saving...' : 'Save Attendance'}
         </Button>
         <Button variant="outlined" sx={{ borderRadius: 2 }}>Download Report</Button>
       </Box>

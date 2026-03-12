@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Typography, Box, Card, CardContent, Chip, LinearProgress, Grid } from '@mui/material';
 import Layout from '../../components/layout/Layout';
 import { parentMenu } from '../../components/layout/menus';
 import { useAuth } from '../../context/AuthContext';
-
-const childInfo = { name: 'Arjun Sharma', class: '10A', rollNo: '007', attendance: 92 };
+import api from '../../services/api';
 
 const recentGrades = [
   { subject: 'Mathematics', grade: '44/50', percent: 88 },
@@ -20,6 +19,11 @@ const upcomingEvents = [
 
 const ParentDashboard = () => {
   const { user } = useAuth();
+  const [childStats, setChildStats] = useState(null);
+
+  useEffect(() => {
+    api.get('/dashboard/student').then(res => setChildStats(res.data)).catch(() => {});
+  }, []);
 
   return (
     <Layout menuItems={parentMenu}>
@@ -27,17 +31,19 @@ const ParentDashboard = () => {
         Welcome, {user?.first_name || 'Parent'}! 👋
       </Typography>
       <Typography variant="body2" color="text.secondary" mb={3}>
-        Here's an overview of {childInfo.name}'s progress.
+        Here's an overview of your child's progress.
       </Typography>
 
       <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', mb: 3, bgcolor: '#1a73e8', color: 'white' }}>
         <CardContent sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
           <Box>
-            <Typography variant="h6" fontWeight={700}>{childInfo.name}</Typography>
-            <Typography variant="body2" sx={{ opacity: 0.8 }}>Class {childInfo.class} • Roll No. {childInfo.rollNo}</Typography>
+            <Typography variant="h6" fontWeight={700}>Arjun Sharma</Typography>
+            <Typography variant="body2" sx={{ opacity: 0.8 }}>Class 10A • Roll No. 007</Typography>
           </Box>
           <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="h4" fontWeight={700}>{childInfo.attendance}%</Typography>
+            <Typography variant="h4" fontWeight={700}>
+              {childStats ? childStats.attendanceRate + '%' : '92%'}
+            </Typography>
             <Typography variant="caption" sx={{ opacity: 0.8 }}>Attendance</Typography>
           </Box>
         </CardContent>
@@ -56,7 +62,8 @@ const ParentDashboard = () => {
                       <Chip label={g.grade} size="small" color={g.percent >= 80 ? 'success' : 'warning'} />
                     </Box>
                     <LinearProgress variant="determinate" value={g.percent}
-                      sx={{ height: 6, borderRadius: 3, bgcolor: '#f0f0f0', '& .MuiLinearProgress-bar': { bgcolor: g.percent >= 80 ? '#34a853' : '#fbbc04', borderRadius: 3 } }} />
+                      sx={{ height: 6, borderRadius: 3, bgcolor: '#f0f0f0',
+                        '& .MuiLinearProgress-bar': { bgcolor: g.percent >= 80 ? '#34a853' : '#fbbc04', borderRadius: 3 } }} />
                   </Box>
                 ))}
               </Box>

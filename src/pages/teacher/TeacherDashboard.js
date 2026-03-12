@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Typography, Box, Card, CardContent, Button, Chip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { teacherMenu } from '../../components/layout/menus';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 
 const schedule = [
   { subject: 'Mathematics', class: '10A', room: 'Room 201', time: '8:00 AM' },
@@ -12,15 +13,14 @@ const schedule = [
   { subject: 'Mathematics', class: '7A', room: 'Room 201', time: '2:00 PM' },
 ];
 
-const pendingTasks = [
-  'Grade 10A assignments (12 pending)',
-  'Submit lesson plan for Week 11',
-  'Exam results entry due tomorrow',
-];
-
 const TeacherDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    api.get('/dashboard/teacher').then(res => setStats(res.data)).catch(() => {});
+  }, []);
 
   return (
     <Layout menuItems={teacherMenu}>
@@ -30,6 +30,17 @@ const TeacherDashboard = () => {
       <Typography variant="body2" color="text.secondary" mb={3}>
         You have {schedule.length} classes today.
       </Typography>
+
+      {stats && (
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+          <Card sx={{ borderRadius: 3, flex: 1, minWidth: 150, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderLeft: '4px solid #1a73e8' }}>
+            <CardContent sx={{ py: 1.5 }}>
+              <Typography variant="h5" fontWeight={700} color="#1a73e8">{stats.totalAssignments}</Typography>
+              <Typography variant="caption" color="text.secondary">Assignments Created</Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      )}
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
         <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -71,7 +82,7 @@ const TeacherDashboard = () => {
             <CardContent>
               <Typography variant="h6" fontWeight={700} mb={2}>📌 Pending Tasks</Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {pendingTasks.map((task, i) => (
+                {['Grade 10A assignments (12 pending)', 'Submit lesson plan for Week 11', 'Exam results entry due tomorrow'].map((task, i) => (
                   <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#ea4335', flexShrink: 0 }} />
                     <Typography variant="body2">{task}</Typography>
