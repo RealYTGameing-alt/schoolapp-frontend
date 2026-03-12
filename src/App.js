@@ -4,6 +4,13 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/common/PrivateRoute';
 import { createTheme, ThemeProvider } from '@mui/material';
 
+// Principal
+import PrincipalDashboard from './pages/principal/PrincipalDashboard';
+import PrincipalTeachers from './pages/principal/PrincipalTeachers';
+import PrincipalStudents from './pages/principal/PrincipalStudents';
+import PrincipalAttendance from './pages/principal/PrincipalAttendance';
+import PrincipalAnnouncements from './pages/principal/PrincipalAnnouncements';
+
 // Auth
 import Login from './pages/auth/Login';
 
@@ -35,6 +42,8 @@ import ParentDashboard from './pages/parent/ParentDashboard';
 import ChildProgress from './pages/parent/ChildProgress';
 import ParentFees from './pages/parent/ParentFees';
 import ParentCalendar from './pages/parent/ParentCalendar';
+
+
 
 // Shared
 import Messaging from './pages/shared/Messaging';
@@ -88,7 +97,14 @@ function App() {
           <Route path="/parent/fees" element={<PrivateRoute role="parent"><ParentFees /></PrivateRoute>} />
           <Route path="/parent/messages" element={<PrivateRoute role="parent"><Messaging /></PrivateRoute>} />
           <Route path="/parent/calendar" element={<PrivateRoute role="parent"><ParentCalendar /></PrivateRoute>} />
-
+         
+          {/* Principal */}
+          <Route path="/principal" element={<PrivateRoute role="principal"><PrincipalDashboard /></PrivateRoute>} />
+          <Route path="/principal/teachers" element={<PrivateRoute role="principal"><PrincipalTeachers /></PrivateRoute>} />
+          <Route path="/principal/students" element={<PrivateRoute role="principal"><PrincipalStudents /></PrivateRoute>} />
+          <Route path="/principal/attendance" element={<PrivateRoute role="principal"><PrincipalAttendance /></PrivateRoute>} />
+          <Route path="/principal/announcements" element={<PrivateRoute role="principal"><PrincipalAnnouncements /></PrivateRoute>} />
+          <Route path="/principal/messages" element={<PrivateRoute role="principal"><Messaging /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </AuthProvider>

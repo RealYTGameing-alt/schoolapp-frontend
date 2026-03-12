@@ -10,6 +10,7 @@ import QuizIcon from '@mui/icons-material/Quiz';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
+import CampaignIcon from '@mui/icons-material/Campaign';
 
 export const adminMenu = [
   { text: 'Dashboard', path: '/admin', icon: <DashboardIcon /> },
@@ -46,4 +47,13 @@ export const parentMenu = [
   { text: 'Fee Payments', path: '/parent/fees', icon: <AttachMoneyIcon /> },
   { text: 'Messages', path: '/parent/messages', icon: <MessageIcon /> },
   { text: 'School Calendar', path: '/parent/calendar', icon: <EventNoteIcon /> },
+];
+
+export const principalMenu = [
+  { text: 'Dashboard', path: '/principal', icon: <DashboardIcon /> },
+  { text: 'Teachers', path: '/principal/teachers', icon: <PeopleIcon /> },
+  { text: 'Students', path: '/principal/students', icon: <SchoolIcon /> },
+  { text: 'Attendance Reports', path: '/principal/attendance', icon: <CheckCircleIcon /> },
+  { text: 'Announcements', path: '/principal/announcements', icon: <CampaignIcon /> },
+  { text: 'Messages', path: '/principal/messages', icon: <MessageIcon /> },
 ];

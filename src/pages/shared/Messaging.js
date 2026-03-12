@@ -54,6 +54,15 @@ const allMenuItems = {
     { text: 'Messages', path: '/parent/messages', icon: <MessageIcon /> },
     { text: 'School Calendar', path: '/parent/calendar', icon: <EventNoteIcon /> },
   ],
+
+  principal: [
+  { text: 'Dashboard', path: '/principal', icon: <DashboardIcon /> },
+  { text: 'Teachers', path: '/principal/teachers', icon: <PeopleIcon /> },
+  { text: 'Students', path: '/principal/students', icon: <SchoolIcon /> },
+  { text: 'Attendance Reports', path: '/principal/attendance', icon: <CheckCircleIcon /> },
+  { text: 'Announcements', path: '/principal/announcements', icon: <MessageIcon /> },
+  { text: 'Messages', path: '/principal/messages', icon: <MessageIcon /> },
+],
 };
 
 // Each role sees ONLY their relevant contacts
@@ -80,6 +89,21 @@ const contactsByRole = {
     { id: 'p2', name: 'Admin User', role: 'Admin', avatar: 'AU', online: false },
     { id: 'p3', name: 'Dr. Meena Verma', role: 'Principal', avatar: 'MV', online: false },
   ],
+  principal: [
+  { id: 'pr1', name: 'Admin User', role: 'Admin', avatar: 'AU', online: true },
+  { id: 'pr2', name: 'Rajesh Kumar', role: 'Teacher', avatar: 'RK', online: true },
+  { id: 'pr3', name: 'Sunita Sharma', role: 'Teacher', avatar: 'SS', online: false },
+  { id: 'pr4', name: 'Priya Menon', role: 'Teacher', avatar: 'PM', online: true },
+],
+
+// In messagesByRole add:
+principal: {
+  pr1: [{ id: 1, from: 'them', text: 'Board inspection scheduled for April 15.', time: 'Monday' }],
+  pr2: [{ id: 1, from: 'them', text: 'Week 11 lesson plans submitted.', time: '9:00 AM' }],
+  pr3: [{ id: 1, from: 'them', text: 'Science lab equipment request submitted.', time: 'Yesterday' }],
+  pr4: [{ id: 1, from: 'them', text: 'English exam papers are ready.', time: '11:00 AM' }],
+},
+
 };
 
 // Each role has their own private message history
