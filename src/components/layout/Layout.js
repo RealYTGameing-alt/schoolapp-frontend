@@ -1,17 +1,141 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Typography, Avatar, IconButton, AppBar, Toolbar,
-  Divider, useMediaQuery, useTheme, Menu, MenuItem
+  Divider, useMediaQuery, useTheme, Menu, MenuItem, Badge, CircularProgress
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 
 const DRAWER_WIDTH = 220;
 
+// ─── Notification Bell Component ───────────────────────────────────────────
+const NotificationBell = () => {
+  const [notifications, setNotifications] = useState([]);
+  const [unread, setUnread] = useState(0);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchNotifications = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/notifications');
+      setNotifications(res.data.notifications || []);
+      setUnread(res.data.unreadCount || 0);
+    } catch (err) {}
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.put('/notifications/read-all/all');
+      setUnread(0);
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    } catch (err) {}
+  };
+
+  const handleMarkRead = async (id) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+      setUnread(prev => Math.max(0, prev - 1));
+    } catch (err) {}
+  };
+
+  const typeIcons = {
+    attendance: '📋',
+    assignment: '📝',
+    announcement: '📢',
+    grade: '🎯',
+    default: '🔔',
+  };
+
+  return (
+    <>
+      <IconButton onClick={(e) => { setAnchorEl(e.currentTarget); fetchNotifications(); }}>
+        <Badge badgeContent={unread} color="error" max={99}>
+          <NotificationsIcon sx={{ color: '#666' }} />
+        </Badge>
+      </IconButton>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        PaperProps={{ sx: { borderRadius: 2, width: 360, maxHeight: 480, mt: 1 } }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <Box sx={{ px: 2, py: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f0f0f0' }}>
+          <Typography variant="subtitle1" fontWeight={700}>🔔 Notifications</Typography>
+          {unread > 0 && (
+            <Typography variant="caption" color="primary" sx={{ cursor: 'pointer' }} onClick={handleMarkAllRead}>
+              Mark all read
+            </Typography>
+          )}
+        </Box>
+
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+            <CircularProgress size={24} />
+          </Box>
+        )}
+
+        {!loading && notifications.length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography variant="h4">🔔</Typography>
+            <Typography variant="body2" color="text.secondary" mt={1}>No notifications yet</Typography>
+          </Box>
+        )}
+
+        {!loading && notifications.map((n) => (
+          <MenuItem
+            key={n.id}
+            onClick={() => handleMarkRead(n.id)}
+            sx={{
+              py: 1.5, px: 2, alignItems: 'flex-start', gap: 1.5,
+              bgcolor: n.is_read ? 'white' : '#f0f7ff',
+              borderBottom: '1px solid #f5f5f5',
+              whiteSpace: 'normal',
+            }}
+          >
+            <Typography sx={{ fontSize: 20, mt: 0.3, flexShrink: 0 }}>
+              {typeIcons[n.type] || typeIcons.default}
+            </Typography>
+            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+              <Typography variant="body2" fontWeight={n.is_read ? 400 : 700}>
+                {n.title}
+              </Typography>
+              <Typography variant="caption" color="text.secondary"
+                sx={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                {n.body}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" display="block" mt={0.3}>
+                {new Date(n.created_at).toLocaleString('en-IN')}
+              </Typography>
+            </Box>
+            {!n.is_read && (
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1a73e8', mt: 0.8, flexShrink: 0 }} />
+            )}
+          </MenuItem>
+        ))}
+      </Menu>
+    </>
+  );
+};
+
+// ─── Main Layout Component ──────────────────────────────────────────────────
 const Layout = ({ children, menuItems }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -121,8 +245,9 @@ const Layout = ({ children, menuItems }) => {
               🎓 EduManage Pro
             </Typography>
             <Box sx={{ flexGrow: 1 }} />
+            <NotificationBell />
             <Avatar
-              sx={{ bgcolor: '#1a73e8', width: 32, height: 32, fontSize: 12, cursor: 'pointer' }}
+              sx={{ bgcolor: '#1a73e8', width: 32, height: 32, fontSize: 12, cursor: 'pointer', ml: 1 }}
               onClick={(e) => setAnchorEl(e.currentTarget)}
             >
               {initials}
@@ -159,18 +284,12 @@ const Layout = ({ children, menuItems }) => {
         {/* Desktop topbar */}
         {!isMobile && (
           <Box sx={{
-            bgcolor: 'white',
-            px: 3,
-            py: 1.5,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-            position: 'sticky',
-            top: 0,
-            zIndex: 100,
+            bgcolor: 'white', px: 3, py: 1.5,
+            display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06)', position: 'sticky', top: 0, zIndex: 100,
           }}>
-            <Typography variant="body2" color="text.secondary" mr={2}>
+            <NotificationBell />
+            <Typography variant="body2" color="text.secondary" mx={2}>
               {user?.first_name} {user?.last_name}
             </Typography>
             <Avatar
@@ -197,7 +316,6 @@ const Layout = ({ children, menuItems }) => {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         PaperProps={{ sx: { borderRadius: 2, minWidth: 200, mt: 1, boxShadow: '0 4px 20px rgba(0,0,0,0.12)' } }}
       >
-        {/* User info at top of menu */}
         <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #f0f0f0' }}>
           <Typography variant="body2" fontWeight={700}>
             {user?.first_name} {user?.last_name}
