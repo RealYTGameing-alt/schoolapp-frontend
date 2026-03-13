@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import {
   Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Typography, Avatar, IconButton, AppBar, Toolbar,
-  Divider, useMediaQuery, useTheme
+  Divider, useMediaQuery, useTheme, Menu, MenuItem
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
+import PersonIcon from '@mui/icons-material/Person';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -18,8 +19,10 @@ const Layout = ({ children, menuItems }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleLogout = () => {
+    setAnchorEl(null);
     logout();
     navigate('/login');
   };
@@ -50,10 +53,10 @@ const Layout = ({ children, menuItems }) => {
           {initials}
         </Avatar>
         <Box sx={{ overflow: 'hidden' }}>
-          <Typography variant="body2" fontWeight={600} noWrap>
+          <Typography variant="body2" fontWeight={600} noWrap sx={{ color: 'white' }}>
             {user?.first_name} {user?.last_name}
           </Typography>
-          <Typography variant="caption" sx={{ opacity: 0.6, textTransform: 'capitalize' }}>
+          <Typography variant="caption" sx={{ opacity: 0.6, textTransform: 'capitalize', color: 'white' }}>
             {user?.role_name}
           </Typography>
         </Box>
@@ -118,7 +121,10 @@ const Layout = ({ children, menuItems }) => {
               🎓 EduManage Pro
             </Typography>
             <Box sx={{ flexGrow: 1 }} />
-            <Avatar sx={{ bgcolor: '#1a73e8', width: 32, height: 32, fontSize: 12 }}>
+            <Avatar
+              sx={{ bgcolor: '#1a73e8', width: 32, height: 32, fontSize: 12, cursor: 'pointer' }}
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+            >
               {initials}
             </Avatar>
           </Toolbar>
@@ -148,11 +154,8 @@ const Layout = ({ children, menuItems }) => {
       )}
 
       {/* Main content */}
-      <Box sx={{
-        flexGrow: 1,
-        minWidth: 0,
-        mt: isMobile ? '56px' : 0,
-      }}>
+      <Box sx={{ flexGrow: 1, minWidth: 0, mt: isMobile ? '56px' : 0 }}>
+
         {/* Desktop topbar */}
         {!isMobile && (
           <Box sx={{
@@ -170,8 +173,10 @@ const Layout = ({ children, menuItems }) => {
             <Typography variant="body2" color="text.secondary" mr={2}>
               {user?.first_name} {user?.last_name}
             </Typography>
-            <Avatar sx={{ bgcolor: '#1a73e8', width: 34, height: 34, fontSize: 13, cursor: 'pointer' }}
-              onClick={handleLogout}>
+            <Avatar
+              sx={{ bgcolor: '#1a73e8', width: 34, height: 34, fontSize: 13, cursor: 'pointer' }}
+              onClick={(e) => setAnchorEl(e.currentTarget)}
+            >
               {initials}
             </Avatar>
           </Box>
@@ -182,6 +187,40 @@ const Layout = ({ children, menuItems }) => {
           {children}
         </Box>
       </Box>
+
+      {/* Profile Dropdown Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        PaperProps={{ sx: { borderRadius: 2, minWidth: 200, mt: 1, boxShadow: '0 4px 20px rgba(0,0,0,0.12)' } }}
+      >
+        {/* User info at top of menu */}
+        <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #f0f0f0' }}>
+          <Typography variant="body2" fontWeight={700}>
+            {user?.first_name} {user?.last_name}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>
+            {user?.role_name}
+          </Typography>
+          <br />
+          <Typography variant="caption" color="text.secondary">
+            {user?.email}
+          </Typography>
+        </Box>
+        <MenuItem onClick={() => setAnchorEl(null)} sx={{ gap: 1.5, py: 1.2 }}>
+          <PersonIcon fontSize="small" color="action" />
+          <Typography variant="body2">My Profile</Typography>
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout} sx={{ gap: 1.5, py: 1.2, color: '#ea4335' }}>
+          <LogoutIcon fontSize="small" />
+          <Typography variant="body2" color="#ea4335">Logout</Typography>
+        </MenuItem>
+      </Menu>
+
     </Box>
   );
 };
