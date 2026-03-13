@@ -173,8 +173,17 @@ const messagesByRole = {
 
 const Messaging = () => {
   const { user } = useAuth();
-  const role = user?.role_name || 'teacher';
-  const menuItems = allMenuItems[role] || allMenuItems.teacher;
+  
+  console.log('User object:', user);
+  console.log('Role detected:', role);
+  const rawRole = user?.role_name?.toLowerCase() || user?.role?.toLowerCase() || 'teacher';
+const role = rawRole === 'admin' ? 'admin' 
+  : rawRole === 'principal' ? 'principal'
+  : rawRole === 'teacher' ? 'teacher'
+  : rawRole === 'student' ? 'student'
+  : rawRole === 'parent' ? 'parent'
+  : 'teacher';
+const menuItems = allMenuItems[role] || allMenuItems.teacher;
   const contacts = contactsByRole[role] || [];
   const [selected, setSelected] = useState(contacts[0]);
   const [messages, setMessages] = useState(messagesByRole[role] || {});
