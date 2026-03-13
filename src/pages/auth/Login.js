@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Box, TextField, Button, Typography, Alert,
-  Card, CardContent, InputAdornment, IconButton
+  Card, CardContent, InputAdornment, IconButton, CircularProgress
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -17,12 +17,19 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async (emailVal, passwordVal) => {
+    const useEmail = emailVal || email;
+    const usePassword = passwordVal || password;
+
+    if (!useEmail || !usePassword) {
+      setError('Please enter email and password.');
+      return;
+    }
+
     setLoading(true);
     setError('');
     try {
-      const result = await login(email, password);
+      const result = await login(useEmail, usePassword);
       const role = result?.user?.role_name?.toLowerCase();
       if (role === 'admin') navigate('/admin');
       else if (role === 'principal') navigate('/principal');
@@ -34,6 +41,13 @@ const Login = () => {
       setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
     }
     setLoading(false);
+  };
+
+  const handleDemoLogin = async (acc) => {
+    setEmail(acc.email);
+    setPassword(acc.password);
+    setError('');
+    await handleLogin(acc.email, acc.password);
   };
 
   const demoAccounts = [
@@ -73,35 +87,36 @@ const Login = () => {
 
             {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
 
-            <Box component="form" onSubmit={handleLogin}>
-              <TextField
-                fullWidth label="Email" type="email"
-                value={email} onChange={(e) => setEmail(e.target.value)}
-                sx={{ mb: 2 }} required size="small"
-              />
-              <TextField
-                fullWidth label="Password"
-                type={showPassword ? 'text' : 'password'}
-                value={password} onChange={(e) => setPassword(e.target.value)}
-                sx={{ mb: 2.5 }} required size="small"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => setShowPassword(!showPassword)}>
-                        {showPassword ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
-                      </IconButton>
-                    </InputAdornment>
-                  )
-                }}
-              />
-              <Button
-                fullWidth type="submit" variant="contained"
-                disabled={loading}
-                sx={{ borderRadius: 2, py: 1.2, fontWeight: 700, fontSize: 15 }}
-              >
-                {loading ? 'Signing in...' : 'Sign In'}
-              </Button>
-            </Box>
+            <TextField
+              fullWidth label="Email" type="email"
+              value={email} onChange={(e) => setEmail(e.target.value)}
+              sx={{ mb: 2 }} required size="small"
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+            />
+            <TextField
+              fullWidth label="Password"
+              type={showPassword ? 'text' : 'password'}
+              value={password} onChange={(e) => setPassword(e.target.value)}
+              sx={{ mb: 2.5 }} required size="small"
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+            />
+            <Button
+              fullWidth variant="contained"
+              disabled={loading}
+              onClick={() => handleLogin()}
+              sx={{ borderRadius: 2, py: 1.2, fontWeight: 700, fontSize: 15 }}
+            >
+              {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
+            </Button>
           </CardContent>
         </Card>
 
@@ -109,7 +124,7 @@ const Login = () => {
         <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', mt: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={1.5}>
-              🔑 DEMO ACCOUNTS — TAP TO LOGIN
+              🔑 DEMO ACCOUNTS — TAP TO LOGIN INSTANTLY
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {demoAccounts.map((acc) => (
@@ -118,7 +133,8 @@ const Login = () => {
                   fullWidth
                   variant="outlined"
                   size="small"
-                  onClick={() => { setEmail(acc.email); setPassword(acc.password); }}
+                  disabled={loading}
+                  onClick={() => handleDemoLogin(acc)}
                   sx={{
                     borderRadius: 2,
                     borderColor: acc.color,
@@ -128,16 +144,18 @@ const Login = () => {
                     '&:hover': { bgcolor: acc.color + '11', borderColor: acc.color }
                   }}
                 >
-                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: acc.color, mr: 1.5 }} />
-                  <Typography variant="caption" fontWeight={600}>{acc.role}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                    {acc.email}
-                  </Typography>
+                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: acc.color, mr: 1.5, flexShrink: 0 }} />
+                  <Typography variant="caption" fontWeight={700} mr={1}>{acc.role}</Typography>
+                  <Typography variant="caption" color="text.secondary">{acc.email}</Typography>
                 </Button>
               ))}
             </Box>
           </CardContent>
         </Card>
+
+        <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mt={2}>
+          New accounts are created by your school admin.
+        </Typography>
       </Box>
     </Box>
   );
