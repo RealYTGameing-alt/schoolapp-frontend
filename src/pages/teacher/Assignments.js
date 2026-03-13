@@ -3,9 +3,9 @@ import {
   Typography, Box, Card, CardContent, Button, Chip,
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Table, TableBody, TableCell, TableHead,
-  TableRow, Avatar, Alert, Tabs, Tab
+  TableRow, Avatar, Alert, Tabs, Tab, CircularProgress,
+  LinearProgress
 } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import QuizIcon from '@mui/icons-material/Quiz';
@@ -14,16 +14,11 @@ import MessageIcon from '@mui/icons-material/Message';
 import DownloadIcon from '@mui/icons-material/Download';
 import GradeIcon from '@mui/icons-material/Grade';
 import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import Layout from '../../components/layout/Layout';
-
-const menuItems = [
-  { text: 'Dashboard', path: '/teacher', icon: <DashboardIcon /> },
-  { text: 'Attendance', path: '/teacher/attendance', icon: <CheckCircleIcon /> },
-  { text: 'Assignments', path: '/teacher/assignments', icon: <AssignmentIcon /> },
-  { text: 'Exams', path: '/teacher/exams', icon: <QuizIcon /> },
-  { text: 'Lesson Plans', path: '/teacher/lessons', icon: <MenuBookIcon /> },
-  { text: 'Messages', path: '/teacher/messages', icon: <MessageIcon /> },
-];
+import { teacherMenu } from '../../components/layout/menus';
+import api from '../../services/api';
 
 const mockAssignments = [
   {
@@ -31,18 +26,63 @@ const mockAssignments = [
     class: '10A', dueDate: '2026-03-10', maxMarks: 20, totalStudents: 6,
     submissions: [
       { id: 1, studentName: 'Aarav Sharma', submittedAt: '2026-03-09 10:30', isLate: false, status: 'submitted', hasFile: true, textContent: null, grade: null },
-      { id: 2, studentName: 'Priya Patel', submittedAt: '2026-03-09 14:20', isLate: false, status: 'graded', hasFile: false, textContent: 'My solutions to all 20 problems...', grade: 18 },
-      { id: 3, studentName: 'Rohan Singh', submittedAt: '2026-03-11 09:00', isLate: true, status: 'submitted', hasFile: true, textContent: null, grade: null },
+      { id: 2, studentName: 'Priya Patel', submittedAt: '2026-03-09 14:20', isLate: false, status: 'graded', hasFile: false, textContent: 'Furthermore, the solutions to all 20 problems are comprehensive and multifaceted. It is important to note that each equation was solved utilizing the standard quadratic formula. Moreover, the results underscore the importance of algebraic thinking.', grade: 18 },
+      { id: 3, studentName: 'Rohan Singh', submittedAt: '2026-03-11 09:00', isLate: true, status: 'submitted', hasFile: true, textContent: 'Furthermore, the solutions to all 20 problems are comprehensive and multifaceted. It is important to note that each equation was solved utilizing the standard quadratic formula. Moreover, the results underscore the importance of algebraic thinking.', grade: null },
     ]
   },
   {
     id: 2, title: 'Essay: Climate Change', subject: 'English',
     class: '10A', dueDate: '2026-03-08', maxMarks: 30, totalStudents: 6,
     submissions: [
-      { id: 4, studentName: 'Ananya Gupta', submittedAt: '2026-03-07 16:00', isLate: false, status: 'submitted', hasFile: true, textContent: null, grade: null },
+      { id: 4, studentName: 'Ananya Gupta', submittedAt: '2026-03-07 16:00', isLate: false, status: 'submitted', hasFile: true, textContent: 'Climate change is a big problem. I think we should use less plastic. My dad says the weather is getting hotter every year. We should plant more trees and use solar energy instead of coal.', grade: null },
     ]
   },
 ];
+
+// Local plagiarism checker
+const checkPlagiarism = (text1, text2) => {
+  if (!text1 || !text2) return 0;
+  const normalize = (text) => text.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 3);
+  const words1 = new Set(normalize(text1));
+  const words2 = new Set(normalize(text2));
+  if (words1.size === 0 || words2.size === 0) return 0;
+  const intersection = new Set([...words1].filter(w => words2.has(w)));
+  const union = new Set([...words1, ...words2]);
+  return Math.round((intersection.size / union.size) * 100);
+};
+
+// Local AI detector
+const detectAI = (text) => {
+  if (!text || text.length < 50) return { score: 0, verdict: 'Too short to analyze' };
+  const aiPatterns = [
+    /\b(furthermore|moreover|additionally|consequently|therefore|thus)\b/gi,
+    /\b(it is worth noting|it is important to note|in conclusion|to summarize)\b/gi,
+    /\b(delve|underscore|leverage|utilize|facilitate|implement)\b/gi,
+    /\b(comprehensive|multifaceted|nuanced|intricate|robust)\b/gi,
+  ];
+  let patternCount = 0;
+  aiPatterns.forEach(pattern => {
+    const matches = text.match(pattern);
+    if (matches) patternCount += matches.length;
+  });
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+  const lengths = sentences.map(s => s.trim().split(/\s+/).length);
+  const avgLength = lengths.reduce((a, b) => a + b, 0) / (lengths.length || 1);
+  const variance = lengths.reduce((sum, l) => sum + Math.pow(l - avgLength, 2), 0) / (lengths.length || 1);
+  const wordCount = text.split(/\s+/).length;
+  const patternDensity = (patternCount / wordCount) * 100;
+  let aiScore = 0;
+  if (patternDensity > 3) aiScore += 40;
+  else if (patternDensity > 1.5) aiScore += 20;
+  if (variance < 15 && sentences.length > 3) aiScore += 30;
+  if (patternCount > 5) aiScore += 20;
+  aiScore = Math.min(aiScore, 95);
+  let verdict;
+  if (aiScore >= 70) verdict = '🔴 Likely AI-generated';
+  else if (aiScore >= 40) verdict = '🟡 Possibly AI-assisted';
+  else verdict = '🟢 Likely human-written';
+  return { score: aiScore, verdict };
+};
 
 const TeacherAssignments = () => {
   const [tab, setTab] = useState(0);
@@ -54,14 +94,50 @@ const TeacherAssignments = () => {
   const [success, setSuccess] = useState('');
   const [createDialog, setCreateDialog] = useState(false);
   const [newAssignment, setNewAssignment] = useState({ title: '', subject: '', class: '', dueDate: '', maxMarks: '', description: '' });
+  const [analysisDialog, setAnalysisDialog] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const handleGrade = () => {
     setSuccess(`✅ Graded ${selectedSubmission.studentName}: ${grade} marks`);
     setTimeout(() => { setGradeDialog(false); setSuccess(''); }, 2000);
   };
 
+  const handleAnalyze = async (sub) => {
+    setAnalyzing(true);
+    setAnalysisDialog(true);
+    setAnalysisResult(null);
+
+    try {
+      const res = await api.get(`/plagiarism/analyze/${sub.id}`);
+      setAnalysisResult(res.data);
+    } catch (err) {
+      // Run analysis locally using mock data
+      const aiAnalysis = detectAI(sub.textContent);
+      const otherSubs = selectedAssignment.submissions.filter(s => s.id !== sub.id && s.textContent);
+      const plagiarismComparisons = otherSubs.map(other => ({
+        studentName: other.studentName,
+        similarity: checkPlagiarism(sub.textContent, other.textContent)
+      })).sort((a, b) => b.similarity - a.similarity);
+      const maxSimilarity = plagiarismComparisons.length > 0 ? plagiarismComparisons[0].similarity : 0;
+
+      setAnalysisResult({
+        studentName: sub.studentName,
+        wordCount: sub.textContent ? sub.textContent.split(/\s+/).length : 0,
+        hasTextContent: !!sub.textContent,
+        aiDetection: aiAnalysis,
+        plagiarism: {
+          maxSimilarity,
+          verdict: maxSimilarity >= 70 ? '🔴 High plagiarism detected' : maxSimilarity >= 40 ? '🟡 Moderate similarity' : '🟢 Original work',
+          comparisons: plagiarismComparisons,
+        }
+      });
+    }
+    setAnalyzing(false);
+  };
+
   return (
-    <Layout menuItems={menuItems}>
+    <Layout menuItems={teacherMenu}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h5" fontWeight={700}>📝 Assignments</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateDialog(true)} sx={{ borderRadius: 2 }}>
@@ -88,7 +164,9 @@ const TeacherAssignments = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Chip label={`${a.submissions.length}/${a.totalStudents} submitted`}
                     color={a.submissions.length === a.totalStudents ? 'success' : 'warning'} size="small" />
-                  <Button variant="outlined" size="small" onClick={() => { setSelectedAssignment(a); setTab(1); }} sx={{ borderRadius: 2 }}>
+                  <Button variant="outlined" size="small"
+                    onClick={() => { setSelectedAssignment(a); setTab(1); }}
+                    sx={{ borderRadius: 2 }}>
                     View Submissions
                   </Button>
                 </Box>
@@ -100,7 +178,6 @@ const TeacherAssignments = () => {
 
       {tab === 1 && (
         <Box>
-          {/* Assignment selector */}
           <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
             {mockAssignments.map(a => (
               <Chip key={a.id} label={a.title} onClick={() => setSelectedAssignment(a)}
@@ -117,7 +194,7 @@ const TeacherAssignments = () => {
                 <Table>
                   <TableHead>
                     <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                      <TableCell fontWeight={700}>Student</TableCell>
+                      <TableCell>Student</TableCell>
                       <TableCell>Submitted At</TableCell>
                       <TableCell>Status</TableCell>
                       <TableCell>File</TableCell>
@@ -159,11 +236,18 @@ const TeacherAssignments = () => {
                           ) : '—'}
                         </TableCell>
                         <TableCell>
-                          <Button size="small" startIcon={<GradeIcon />} variant="contained"
-                            onClick={() => { setSelectedSubmission(sub); setGrade(''); setFeedback(''); setGradeDialog(true); }}
-                            sx={{ borderRadius: 2 }}>
-                            Grade
-                          </Button>
+                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                            <Button size="small" variant="outlined" color="warning"
+                              onClick={() => handleAnalyze(sub)}
+                              sx={{ borderRadius: 2 }}>
+                              🔍 Analyze
+                            </Button>
+                            <Button size="small" startIcon={<GradeIcon />} variant="contained"
+                              onClick={() => { setSelectedSubmission(sub); setGrade(''); setFeedback(''); setGradeDialog(true); }}
+                              sx={{ borderRadius: 2 }}>
+                              Grade
+                            </Button>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -222,6 +306,124 @@ const TeacherAssignments = () => {
           <Button variant="contained" onClick={() => { setCreateDialog(false); setSuccess('Assignment created!'); }}>Create</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Analysis Dialog */}
+      <Dialog open={analysisDialog} onClose={() => setAnalysisDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle fontWeight={700}>🔍 Integrity Analysis</DialogTitle>
+        <DialogContent>
+          {analyzing && (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <CircularProgress />
+              <Typography variant="body2" mt={2} color="text.secondary">
+                Analyzing submission for AI content and plagiarism...
+              </Typography>
+            </Box>
+          )}
+
+          {analysisResult && !analyzing && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="body1" fontWeight={600}>{analysisResult.studentName}</Typography>
+                <Chip label={`${analysisResult.wordCount} words`} size="small" />
+              </Box>
+
+              {/* AI Detection */}
+              <Card sx={{ borderRadius: 2, bgcolor: '#f8f9fa' }}>
+                <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                  <Typography variant="subtitle2" fontWeight={700} mb={1}>🤖 AI Detection</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body2">{analysisResult.aiDetection.verdict}</Typography>
+                    <Chip
+                      label={`${analysisResult.aiDetection.score}% AI`}
+                      size="small"
+                      color={
+                        analysisResult.aiDetection.score >= 70 ? 'error' :
+                        analysisResult.aiDetection.score >= 40 ? 'warning' : 'success'
+                      }
+                    />
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={analysisResult.aiDetection.score}
+                    sx={{
+                      height: 8, borderRadius: 4, bgcolor: '#e0e0e0',
+                      '& .MuiLinearProgress-bar': {
+                        borderRadius: 4,
+                        bgcolor: analysisResult.aiDetection.score >= 70 ? '#ea4335' :
+                                 analysisResult.aiDetection.score >= 40 ? '#fbbc04' : '#34a853'
+                      }
+                    }}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Plagiarism */}
+              <Card sx={{ borderRadius: 2, bgcolor: '#f8f9fa' }}>
+                <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
+                  <Typography variant="subtitle2" fontWeight={700} mb={1}>📄 Plagiarism Check</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body2">{analysisResult.plagiarism.verdict}</Typography>
+                    <Chip
+                      label={`${analysisResult.plagiarism.maxSimilarity}% match`}
+                      size="small"
+                      color={
+                        analysisResult.plagiarism.maxSimilarity >= 70 ? 'error' :
+                        analysisResult.plagiarism.maxSimilarity >= 40 ? 'warning' : 'success'
+                      }
+                    />
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={analysisResult.plagiarism.maxSimilarity}
+                    sx={{
+                      height: 8, borderRadius: 4, bgcolor: '#e0e0e0',
+                      '& .MuiLinearProgress-bar': {
+                        borderRadius: 4,
+                        bgcolor: analysisResult.plagiarism.maxSimilarity >= 70 ? '#ea4335' :
+                                 analysisResult.plagiarism.maxSimilarity >= 40 ? '#fbbc04' : '#34a853'
+                      }
+                    }}
+                  />
+                  {analysisResult.plagiarism.comparisons?.length > 0 && (
+                    <Box mt={1.5}>
+                      <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                        Compared with:
+                      </Typography>
+                      {analysisResult.plagiarism.comparisons.slice(0, 3).map((c, i) => (
+                        <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                          <Typography variant="caption" color="text.secondary">{c.studentName}</Typography>
+                          <Chip
+                            label={`${c.similarity}% similar`}
+                            size="small"
+                            color={c.similarity >= 70 ? 'error' : c.similarity >= 40 ? 'warning' : 'default'}
+                            sx={{ height: 18, fontSize: 10 }}
+                          />
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+
+              {!analysisResult.hasTextContent && (
+                <Alert severity="info" sx={{ borderRadius: 2 }}>
+                  This is a file submission. AI and plagiarism detection only works on text submissions.
+                </Alert>
+              )}
+
+              {analysisResult.hasTextContent && analysisResult.wordCount < 30 && (
+                <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                  Submission is very short. Results may not be accurate.
+                </Alert>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setAnalysisDialog(false)} variant="outlined">Close</Button>
+        </DialogActions>
+      </Dialog>
+
     </Layout>
   );
 };
