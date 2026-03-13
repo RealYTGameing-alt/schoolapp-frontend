@@ -7,6 +7,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_API_URL || 'https://schoolapp-backend-fmuo.onrender.com/api';
 
 const Login = () => {
   const { login } = useAuth();
@@ -28,26 +31,39 @@ const Login = () => {
 
     setLoading(true);
     setError('');
+
     try {
-      const result = await login(useEmail, usePassword);
-      const role = result?.user?.role_name?.toLowerCase();
+      const res = await axios.post(`${API_URL}/auth/login`, {
+        email: useEmail,
+        password: usePassword,
+      });
+
+      const { user, token } = res.data;
+
+      // Save to AuthContext
+      login(user, token);
+
+      // Redirect based on role
+      const role = user?.role_name?.toLowerCase();
       if (role === 'admin') navigate('/admin');
       else if (role === 'principal') navigate('/principal');
       else if (role === 'teacher') navigate('/teacher');
       else if (role === 'student') navigate('/student');
       else if (role === 'parent') navigate('/parent');
       else navigate('/login');
+
     } catch (err) {
+      console.error('Login error:', err);
       setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
     }
+
     setLoading(false);
   };
 
-  const handleDemoLogin = async (acc) => {
+  const handleDemoLogin = (acc) => {
     setEmail(acc.email);
     setPassword(acc.password);
-    setError('');
-    await handleLogin(acc.email, acc.password);
+    handleLogin(acc.email, acc.password);
   };
 
   const demoAccounts = [
@@ -68,7 +84,7 @@ const Login = () => {
       p: 2,
     }}>
       <Box sx={{ width: '100%', maxWidth: 420 }}>
-        {/* Logo */}
+
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Typography variant="h4" fontWeight={800} color="#1a73e8">
             🎓 EduManage Pro
@@ -78,26 +94,23 @@ const Login = () => {
           </Typography>
         </Box>
 
-        {/* Login Card */}
         <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" fontWeight={700} mb={2.5}>
-              Welcome back 👋
-            </Typography>
+            <Typography variant="h6" fontWeight={700} mb={2.5}>Welcome back 👋</Typography>
 
             {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
 
             <TextField
               fullWidth label="Email" type="email"
               value={email} onChange={(e) => setEmail(e.target.value)}
-              sx={{ mb: 2 }} required size="small"
+              sx={{ mb: 2 }} size="small"
               onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
             />
             <TextField
               fullWidth label="Password"
               type={showPassword ? 'text' : 'password'}
               value={password} onChange={(e) => setPassword(e.target.value)}
-              sx={{ mb: 2.5 }} required size="small"
+              sx={{ mb: 2.5 }} size="small"
               onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
               InputProps={{
                 endAdornment: (
@@ -109,18 +122,14 @@ const Login = () => {
                 )
               }}
             />
-            <Button
-              fullWidth variant="contained"
-              disabled={loading}
+            <Button fullWidth variant="contained" disabled={loading}
               onClick={() => handleLogin()}
-              sx={{ borderRadius: 2, py: 1.2, fontWeight: 700, fontSize: 15 }}
-            >
+              sx={{ borderRadius: 2, py: 1.2, fontWeight: 700, fontSize: 15 }}>
               {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Demo accounts */}
         <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', mt: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={1.5}>
@@ -128,22 +137,14 @@ const Login = () => {
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {demoAccounts.map((acc) => (
-                <Button
-                  key={acc.role}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
+                <Button key={acc.role} fullWidth variant="outlined" size="small"
                   disabled={loading}
                   onClick={() => handleDemoLogin(acc)}
                   sx={{
-                    borderRadius: 2,
-                    borderColor: acc.color,
-                    color: acc.color,
-                    justifyContent: 'flex-start',
-                    px: 2,
+                    borderRadius: 2, borderColor: acc.color, color: acc.color,
+                    justifyContent: 'flex-start', px: 2,
                     '&:hover': { bgcolor: acc.color + '11', borderColor: acc.color }
-                  }}
-                >
+                  }}>
                   <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: acc.color, mr: 1.5, flexShrink: 0 }} />
                   <Typography variant="caption" fontWeight={700} mr={1}>{acc.role}</Typography>
                   <Typography variant="caption" color="text.secondary">{acc.email}</Typography>
@@ -156,6 +157,7 @@ const Login = () => {
         <Typography variant="caption" color="text.secondary" display="block" textAlign="center" mt={2}>
           New accounts are created by your school admin.
         </Typography>
+
       </Box>
     </Box>
   );
