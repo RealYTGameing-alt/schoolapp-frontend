@@ -32,53 +32,55 @@ const PrincipalStudents = () => {
       <TextField fullWidth placeholder="Search by name or class..."
         value={search} onChange={e => setSearch(e.target.value)}
         InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }}
-        sx={{ mb: 3, bgcolor: 'white', borderRadius: 2 }}
+        sx={{ mb: 3, bgcolor: 'white', borderRadius: 2 }} size="small"
       />
 
       <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-        <CardContent sx={{ p: 0 }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                <TableCell>Student</TableCell>
-                <TableCell>Class</TableCell>
-                <TableCell>Roll No.</TableCell>
-                <TableCell>Attendance</TableCell>
-                <TableCell>Avg Score</TableCell>
-                <TableCell>Fees</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filtered.map((s) => (
-                <TableRow key={s.id} hover>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Avatar sx={{ bgcolor: '#1a73e8', width: 36, height: 36, fontSize: 14 }}>{s.name.charAt(0)}</Avatar>
-                      <Typography variant="body2" fontWeight={600}>{s.name}</Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell><Chip label={s.class} size="small" /></TableCell>
-                  <TableCell>{s.rollNo}</TableCell>
-                  <TableCell>
-                    <Chip label={s.attendance} size="small"
-                      color={parseInt(s.attendance) >= 90 ? 'success' : parseInt(s.attendance) >= 80 ? 'warning' : 'error'} />
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={s.avgScore + '%'} size="small"
-                      color={s.avgScore >= 80 ? 'success' : s.avgScore >= 60 ? 'warning' : 'error'} />
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={s.fees} size="small"
-                      color={s.fees === 'Paid' ? 'success' : s.fees === 'Pending' ? 'warning' : 'error'} />
-                  </TableCell>
-                  <TableCell>
-                    <Button size="small" variant="outlined" sx={{ borderRadius: 2 }}>View</Button>
-                  </TableCell>
+        <CardContent sx={{ p: 0, overflow: 'auto' }}>
+          <Box sx={{ minWidth: 600 }}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+                  <TableCell>Student</TableCell>
+                  <TableCell>Class</TableCell>
+                  <TableCell>Roll No.</TableCell>
+                  <TableCell>Attendance</TableCell>
+                  <TableCell>Avg Score</TableCell>
+                  <TableCell>Fees</TableCell>
+                  <TableCell>Actions</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {filtered.map((s) => (
+                  <TableRow key={s.id} hover>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Avatar sx={{ bgcolor: '#1a73e8', width: 36, height: 36, fontSize: 14 }}>{s.name.charAt(0)}</Avatar>
+                        <Typography variant="body2" fontWeight={600}>{s.name}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell><Chip label={s.class} size="small" /></TableCell>
+                    <TableCell>{s.rollNo}</TableCell>
+                    <TableCell>
+                      <Chip label={s.attendance} size="small"
+                        color={parseInt(s.attendance) >= 90 ? 'success' : parseInt(s.attendance) >= 80 ? 'warning' : 'error'} />
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={s.avgScore + '%'} size="small"
+                        color={s.avgScore >= 80 ? 'success' : s.avgScore >= 60 ? 'warning' : 'error'} />
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={s.fees} size="small"
+                        color={s.fees === 'Paid' ? 'success' : s.fees === 'Pending' ? 'warning' : 'error'} />
+                    </TableCell>
+                    <TableCell>
+                      <Button size="small" variant="outlined" sx={{ borderRadius: 2 }}>View</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
         </CardContent>
       </Card>
     </Layout>

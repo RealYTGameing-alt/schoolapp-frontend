@@ -31,55 +31,57 @@ const PrincipalTeachers = () => {
       <TextField fullWidth placeholder="Search by name or subject..."
         value={search} onChange={e => setSearch(e.target.value)}
         InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon /></InputAdornment> }}
-        sx={{ mb: 3, bgcolor: 'white', borderRadius: 2 }}
+        sx={{ mb: 3, bgcolor: 'white', borderRadius: 2 }} size="small"
       />
 
       <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-        <CardContent sx={{ p: 0 }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                <TableCell>Teacher</TableCell>
-                <TableCell>Subject</TableCell>
-                <TableCell>Classes</TableCell>
-                <TableCell>Attendance</TableCell>
-                <TableCell>Lesson Plans</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filtered.map((t) => (
-                <TableRow key={t.id} hover>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Avatar sx={{ bgcolor: '#1a73e8', width: 36, height: 36, fontSize: 14 }}>{t.name.charAt(0)}</Avatar>
-                      <Box>
-                        <Typography variant="body2" fontWeight={600}>{t.name}</Typography>
-                        <Typography variant="caption" color="text.secondary">{t.email}</Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{t.subject}</TableCell>
-                  <TableCell><Typography variant="caption">{t.classes}</Typography></TableCell>
-                  <TableCell>
-                    <Chip label={t.attendance} size="small"
-                      color={parseInt(t.attendance) >= 95 ? 'success' : parseInt(t.attendance) >= 90 ? 'warning' : 'error'} />
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={`${t.lessonsSubmitted}/10`} size="small"
-                      color={t.lessonsSubmitted >= 9 ? 'success' : 'warning'} />
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={t.status} size="small" color={t.status === 'Active' ? 'success' : 'warning'} />
-                  </TableCell>
-                  <TableCell>
-                    <Button size="small" variant="outlined" sx={{ borderRadius: 2 }}>View</Button>
-                  </TableCell>
+        <CardContent sx={{ p: 0, overflow: 'auto' }}>
+          <Box sx={{ minWidth: 650 }}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+                  <TableCell>Teacher</TableCell>
+                  <TableCell>Subject</TableCell>
+                  <TableCell>Classes</TableCell>
+                  <TableCell>Attendance</TableCell>
+                  <TableCell>Lesson Plans</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {filtered.map((t) => (
+                  <TableRow key={t.id} hover>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Avatar sx={{ bgcolor: '#1a73e8', width: 36, height: 36, fontSize: 14 }}>{t.name.charAt(0)}</Avatar>
+                        <Box>
+                          <Typography variant="body2" fontWeight={600}>{t.name}</Typography>
+                          <Typography variant="caption" color="text.secondary">{t.email}</Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>{t.subject}</TableCell>
+                    <TableCell><Typography variant="caption">{t.classes}</Typography></TableCell>
+                    <TableCell>
+                      <Chip label={t.attendance} size="small"
+                        color={parseInt(t.attendance) >= 95 ? 'success' : parseInt(t.attendance) >= 90 ? 'warning' : 'error'} />
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={`${t.lessonsSubmitted}/10`} size="small"
+                        color={t.lessonsSubmitted >= 9 ? 'success' : 'warning'} />
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={t.status} size="small" color={t.status === 'Active' ? 'success' : 'warning'} />
+                    </TableCell>
+                    <TableCell>
+                      <Button size="small" variant="outlined" sx={{ borderRadius: 2 }}>View</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
         </CardContent>
       </Card>
     </Layout>

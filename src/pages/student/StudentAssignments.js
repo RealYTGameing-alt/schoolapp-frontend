@@ -161,18 +161,18 @@ const StudentAssignments = () => {
 
           {/* Text submission */}
           <TextField fullWidth multiline rows={4}
-  label="Type your answer here"
-  value={textContent}
-  onChange={(e) => setTextContent(e.target.value)}
-  onPaste={(e) => {
-    e.preventDefault();
-    alert('⚠️ Copy-paste is not allowed! Please type your answer.');
-  }}
-  onCopy={(e) => e.preventDefault()}
-  onCut={(e) => e.preventDefault()}
-  placeholder="Type your answer here (copy-paste is disabled)..."
-  helperText="⚠️ Copy-paste is disabled for academic integrity"
-/>
+         label="Type your answer here"
+         value={textContent}
+         onChange={(e) => setTextContent(e.target.value)}
+         onPaste={(e) => {
+         e.preventDefault();
+         alert('⚠️ Copy-paste is not allowed! Please type your answer.');
+        }}
+        onCopy={(e) => e.preventDefault()}
+        onCut={(e) => e.preventDefault()}
+        placeholder="Type your answer here (copy-paste is disabled)..."
+        helperText="⚠️ Copy-paste is disabled for academic integrity"
+        />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setOpen(false)}>Cancel</Button>

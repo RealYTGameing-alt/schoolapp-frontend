@@ -33,10 +33,7 @@ const Attendance = () => {
   const saveAttendance = async () => {
     setSaving(true);
     try {
-      const records = students.map(s => ({
-        studentId: s.id,
-        status: attendance[s.id]
-      }));
+      const records = students.map(s => ({ studentId: s.id, status: attendance[s.id] }));
       await api.post('/attendance/mark', { records, date, subject: 'Mathematics' });
       setMessage('✅ Attendance saved to database successfully!');
     } catch (err) {
@@ -50,7 +47,7 @@ const Attendance = () => {
 
   return (
     <Layout menuItems={teacherMenu}>
-      <Typography variant="h5" fontWeight={700} mb={3}>✅ Mark Attendance</Typography>
+      <Typography variant="h5" fontWeight={700} mb={1}>✅ Mark Attendance</Typography>
       <Typography variant="body2" color="text.secondary" mb={3}>Class 10A • Mathematics</Typography>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
@@ -64,41 +61,43 @@ const Attendance = () => {
       {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
 
       <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', mb: 3 }}>
-        <CardContent sx={{ p: 0 }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                <TableCell>Roll No.</TableCell>
-                <TableCell>Student Name</TableCell>
-                <TableCell>Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {students.map((s) => (
-                <TableRow key={s.id} hover>
-                  <TableCell>{s.rollNo}</TableCell>
-                  <TableCell>{s.name}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      {['present', 'absent', 'late'].map(status => (
-                        <Button key={status} size="small"
-                          variant={attendance[s.id] === status ? 'contained' : 'outlined'}
-                          color={status === 'present' ? 'success' : status === 'absent' ? 'error' : 'warning'}
-                          onClick={() => setStatus(s.id, status)}
-                          sx={{ borderRadius: 2, minWidth: 80, textTransform: 'uppercase', fontSize: 11 }}>
-                          {status === 'present' ? '✅ Present' : status === 'absent' ? '❌ Absent' : '⏰ Late'}
-                        </Button>
-                      ))}
-                    </Box>
-                  </TableCell>
+        <CardContent sx={{ p: 0, overflow: 'auto' }}>
+          <Box sx={{ minWidth: 500 }}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+                  <TableCell>Roll No.</TableCell>
+                  <TableCell>Student Name</TableCell>
+                  <TableCell>Status</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {students.map((s) => (
+                  <TableRow key={s.id} hover>
+                    <TableCell>{s.rollNo}</TableCell>
+                    <TableCell>{s.name}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        {['present', 'absent', 'late'].map(status => (
+                          <Button key={status} size="small"
+                            variant={attendance[s.id] === status ? 'contained' : 'outlined'}
+                            color={status === 'present' ? 'success' : status === 'absent' ? 'error' : 'warning'}
+                            onClick={() => setStatus(s.id, status)}
+                            sx={{ borderRadius: 2, minWidth: 75, textTransform: 'uppercase', fontSize: 11 }}>
+                            {status === 'present' ? '✅ Present' : status === 'absent' ? '❌ Absent' : '⏰ Late'}
+                          </Button>
+                        ))}
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
         </CardContent>
       </Card>
 
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <Button variant="contained" sx={{ borderRadius: 2 }}
           onClick={saveAttendance} disabled={saving}>
           {saving ? 'Saving...' : 'Save Attendance'}
