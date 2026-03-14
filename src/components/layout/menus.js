@@ -21,6 +21,7 @@ export const adminMenu = [
   { text: 'Calendar', path: '/admin/calendar', icon: <EventNoteIcon /> },
   { text: 'Messages', path: '/admin/messages', icon: <MessageIcon /> },
   { text: 'Reports', path: '/admin/reports', icon: <BarChartIcon /> },
+  { text: 'Timetable Editor', path: '/admin/timetable', icon: <EventNoteIcon /> },
 ];
 
 export const teacherMenu = [

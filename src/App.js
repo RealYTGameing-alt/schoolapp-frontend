@@ -1,3 +1,4 @@
+import TimetableEditor from './pages/admin/TimetableEditor';
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
@@ -74,6 +75,7 @@ function App() {
           <Route path="/admin/calendar" element={<PrivateRoute role="admin"><SchoolCalendar /></PrivateRoute>} />
           <Route path="/admin/messages" element={<PrivateRoute role="admin"><Messaging /></PrivateRoute>} />
           <Route path="/admin/reports" element={<PrivateRoute role="admin"><Reports /></PrivateRoute>} />
+          <Route path="/admin/timetable" element={<PrivateRoute role="admin"><TimetableEditor /></PrivateRoute>} />
 
           {/* Teacher */}
           <Route path="/teacher" element={<PrivateRoute role="teacher"><TeacherDashboard /></PrivateRoute>} />
