@@ -14,7 +14,6 @@ import api from '../../services/api';
 
 const DRAWER_WIDTH = 220;
 
-// ─── Notification Bell Component ───────────────────────────────────────────
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [unread, setUnread] = useState(0);
@@ -135,7 +134,6 @@ const NotificationBell = () => {
   );
 };
 
-// ─── Main Layout Component ──────────────────────────────────────────────────
 const Layout = ({ children, menuItems }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -151,6 +149,12 @@ const Layout = ({ children, menuItems }) => {
     navigate('/login');
   };
 
+  const handleProfile = () => {
+    setAnchorEl(null);
+    const role = user?.role_name?.toLowerCase() || 'student';
+    navigate(`/${role}/profile`);
+  };
+
   const initials = user
     ? `${user.first_name?.charAt(0) || ''}${user.last_name?.charAt(0) || ''}`
     : 'U';
@@ -163,7 +167,6 @@ const Layout = ({ children, menuItems }) => {
       display: 'flex',
       flexDirection: 'column',
     }}>
-      {/* Logo */}
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Typography variant="h6" fontWeight={800} sx={{ color: 'white', fontSize: 16 }}>
           🎓 EduManage Pro
@@ -171,7 +174,6 @@ const Layout = ({ children, menuItems }) => {
       </Box>
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
 
-      {/* User info */}
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Avatar sx={{ bgcolor: '#1a73e8', width: 38, height: 38, fontSize: 14 }}>
           {initials}
@@ -187,7 +189,6 @@ const Layout = ({ children, menuItems }) => {
       </Box>
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', mb: 1 }} />
 
-      {/* Menu items */}
       <List sx={{ flexGrow: 1, px: 1 }}>
         {(menuItems || []).map((item) => {
           const isActive = location.pathname === item.path;
@@ -218,7 +219,6 @@ const Layout = ({ children, menuItems }) => {
         })}
       </List>
 
-      {/* Logout */}
       <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
       <Box sx={{ p: 1 }}>
         <ListItemButton onClick={handleLogout} sx={{ borderRadius: 2, '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' } }}>
@@ -234,7 +234,6 @@ const Layout = ({ children, menuItems }) => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f0f4f9' }}>
 
-      {/* Mobile AppBar */}
       {isMobile && (
         <AppBar position="fixed" sx={{ bgcolor: '#1a1f2e', zIndex: theme.zIndex.drawer + 1 }}>
           <Toolbar sx={{ minHeight: 56 }}>
@@ -256,7 +255,6 @@ const Layout = ({ children, menuItems }) => {
         </AppBar>
       )}
 
-      {/* Desktop Sidebar */}
       {!isMobile && (
         <Box sx={{ width: DRAWER_WIDTH, flexShrink: 0 }}>
           <Box sx={{ width: DRAWER_WIDTH, position: 'fixed', top: 0, left: 0, bottom: 0 }}>
@@ -265,7 +263,6 @@ const Layout = ({ children, menuItems }) => {
         </Box>
       )}
 
-      {/* Mobile Drawer */}
       {isMobile && (
         <Drawer
           variant="temporary"
@@ -278,10 +275,7 @@ const Layout = ({ children, menuItems }) => {
         </Drawer>
       )}
 
-      {/* Main content */}
       <Box sx={{ flexGrow: 1, minWidth: 0, mt: isMobile ? '56px' : 0 }}>
-
-        {/* Desktop topbar */}
         {!isMobile && (
           <Box sx={{
             bgcolor: 'white', px: 3, py: 1.5,
@@ -301,13 +295,11 @@ const Layout = ({ children, menuItems }) => {
           </Box>
         )}
 
-        {/* Page content */}
         <Box sx={{ p: { xs: 2, md: 3 } }}>
           {children}
         </Box>
       </Box>
 
-      {/* Profile Dropdown Menu */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -328,7 +320,7 @@ const Layout = ({ children, menuItems }) => {
             {user?.email}
           </Typography>
         </Box>
-        <MenuItem onClick={() => setAnchorEl(null)} sx={{ gap: 1.5, py: 1.2 }}>
+        <MenuItem onClick={handleProfile} sx={{ gap: 1.5, py: 1.2 }}>
           <PersonIcon fontSize="small" color="action" />
           <Typography variant="body2">My Profile</Typography>
         </MenuItem>

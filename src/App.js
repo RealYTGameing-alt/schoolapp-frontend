@@ -1,9 +1,11 @@
 import TimetableEditor from './pages/admin/TimetableEditor';
+import UserManagement from './pages/admin/UserManagement';
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/common/PrivateRoute';
 import { createTheme, ThemeProvider } from '@mui/material';
+import MyProfile from './pages/shared/MyProfile';
 
 // Principal
 import PrincipalDashboard from './pages/principal/PrincipalDashboard';
@@ -44,8 +46,6 @@ import ChildProgress from './pages/parent/ChildProgress';
 import ParentFees from './pages/parent/ParentFees';
 import ParentCalendar from './pages/parent/ParentCalendar';
 
-
-
 // Shared
 import Messaging from './pages/shared/Messaging';
 
@@ -76,6 +76,8 @@ function App() {
           <Route path="/admin/messages" element={<PrivateRoute role="admin"><Messaging /></PrivateRoute>} />
           <Route path="/admin/reports" element={<PrivateRoute role="admin"><Reports /></PrivateRoute>} />
           <Route path="/admin/timetable" element={<PrivateRoute role="admin"><TimetableEditor /></PrivateRoute>} />
+          <Route path="/admin/users" element={<PrivateRoute role="admin"><UserManagement /></PrivateRoute>} />
+          <Route path="/admin/profile" element={<PrivateRoute role="admin"><MyProfile /></PrivateRoute>} />
 
           {/* Teacher */}
           <Route path="/teacher" element={<PrivateRoute role="teacher"><TeacherDashboard /></PrivateRoute>} />
@@ -84,6 +86,7 @@ function App() {
           <Route path="/teacher/exams" element={<PrivateRoute role="teacher"><Exams /></PrivateRoute>} />
           <Route path="/teacher/lessons" element={<PrivateRoute role="teacher"><LessonPlans /></PrivateRoute>} />
           <Route path="/teacher/messages" element={<PrivateRoute role="teacher"><Messaging /></PrivateRoute>} />
+          <Route path="/teacher/profile" element={<PrivateRoute role="teacher"><MyProfile /></PrivateRoute>} />
 
           {/* Student */}
           <Route path="/student" element={<PrivateRoute role="student"><StudentDashboard /></PrivateRoute>} />
@@ -92,6 +95,7 @@ function App() {
           <Route path="/student/progress" element={<PrivateRoute role="student"><MyProgress /></PrivateRoute>} />
           <Route path="/student/timetable" element={<PrivateRoute role="student"><Timetable /></PrivateRoute>} />
           <Route path="/student/messages" element={<PrivateRoute role="student"><Messaging /></PrivateRoute>} />
+          <Route path="/student/profile" element={<PrivateRoute role="student"><MyProfile /></PrivateRoute>} />
 
           {/* Parent */}
           <Route path="/parent" element={<PrivateRoute role="parent"><ParentDashboard /></PrivateRoute>} />
@@ -99,7 +103,8 @@ function App() {
           <Route path="/parent/fees" element={<PrivateRoute role="parent"><ParentFees /></PrivateRoute>} />
           <Route path="/parent/messages" element={<PrivateRoute role="parent"><Messaging /></PrivateRoute>} />
           <Route path="/parent/calendar" element={<PrivateRoute role="parent"><ParentCalendar /></PrivateRoute>} />
-         
+          <Route path="/parent/profile" element={<PrivateRoute role="parent"><MyProfile /></PrivateRoute>} />
+
           {/* Principal */}
           <Route path="/principal" element={<PrivateRoute role="principal"><PrincipalDashboard /></PrivateRoute>} />
           <Route path="/principal/teachers" element={<PrivateRoute role="principal"><PrincipalTeachers /></PrivateRoute>} />
@@ -107,6 +112,8 @@ function App() {
           <Route path="/principal/attendance" element={<PrivateRoute role="principal"><PrincipalAttendance /></PrivateRoute>} />
           <Route path="/principal/announcements" element={<PrivateRoute role="principal"><PrincipalAnnouncements /></PrivateRoute>} />
           <Route path="/principal/messages" element={<PrivateRoute role="principal"><Messaging /></PrivateRoute>} />
+          <Route path="/principal/profile" element={<PrivateRoute role="principal"><MyProfile /></PrivateRoute>} />
+
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </AuthProvider>
