@@ -54,18 +54,16 @@ const allMenuItems = {
     { text: 'Messages', path: '/parent/messages', icon: <MessageIcon /> },
     { text: 'School Calendar', path: '/parent/calendar', icon: <EventNoteIcon /> },
   ],
-
   principal: [
-  { text: 'Dashboard', path: '/principal', icon: <DashboardIcon /> },
-  { text: 'Teachers', path: '/principal/teachers', icon: <PeopleIcon /> },
-  { text: 'Students', path: '/principal/students', icon: <SchoolIcon /> },
-  { text: 'Attendance Reports', path: '/principal/attendance', icon: <CheckCircleIcon /> },
-  { text: 'Announcements', path: '/principal/announcements', icon: <MessageIcon /> },
-  { text: 'Messages', path: '/principal/messages', icon: <MessageIcon /> },
-],
+    { text: 'Dashboard', path: '/principal', icon: <DashboardIcon /> },
+    { text: 'Teachers', path: '/principal/teachers', icon: <PeopleIcon /> },
+    { text: 'Students', path: '/principal/students', icon: <SchoolIcon /> },
+    { text: 'Attendance Reports', path: '/principal/attendance', icon: <CheckCircleIcon /> },
+    { text: 'Announcements', path: '/principal/announcements', icon: <MessageIcon /> },
+    { text: 'Messages', path: '/principal/messages', icon: <MessageIcon /> },
+  ],
 };
 
-// Each role sees ONLY their relevant contacts
 const contactsByRole = {
   admin: [
     { id: 'a1', name: 'Rajesh Kumar', role: 'Teacher', avatar: 'RK', online: true },
@@ -90,23 +88,13 @@ const contactsByRole = {
     { id: 'p3', name: 'Dr. Meena Verma', role: 'Principal', avatar: 'MV', online: false },
   ],
   principal: [
-  { id: 'pr1', name: 'Admin User', role: 'Admin', avatar: 'AU', online: true },
-  { id: 'pr2', name: 'Rajesh Kumar', role: 'Teacher', avatar: 'RK', online: true },
-  { id: 'pr3', name: 'Sunita Sharma', role: 'Teacher', avatar: 'SS', online: false },
-  { id: 'pr4', name: 'Priya Menon', role: 'Teacher', avatar: 'PM', online: true },
-],
-
-// In messagesByRole add:
-principal: {
-  pr1: [{ id: 1, from: 'them', text: 'Board inspection scheduled for April 15.', time: 'Monday' }],
-  pr2: [{ id: 1, from: 'them', text: 'Week 11 lesson plans submitted.', time: '9:00 AM' }],
-  pr3: [{ id: 1, from: 'them', text: 'Science lab equipment request submitted.', time: 'Yesterday' }],
-  pr4: [{ id: 1, from: 'them', text: 'English exam papers are ready.', time: '11:00 AM' }],
-},
-
+    { id: 'pr1', name: 'Admin User', role: 'Admin', avatar: 'AU', online: true },
+    { id: 'pr2', name: 'Rajesh Kumar', role: 'Teacher', avatar: 'RK', online: true },
+    { id: 'pr3', name: 'Sunita Sharma', role: 'Teacher', avatar: 'SS', online: false },
+    { id: 'pr4', name: 'Priya Menon', role: 'Teacher', avatar: 'PM', online: true },
+  ],
 };
 
-// Each role has their own private message history
 const messagesByRole = {
   admin: {
     a1: [
@@ -150,7 +138,7 @@ const messagesByRole = {
     ],
     s2: [
       { id: 1, from: 'them', text: 'Your lab report was very well written. Keep it up!', time: 'Yesterday' },
-      { id: 2, from: 'me', text: 'Thank you ma\'am!', time: 'Yesterday' },
+      { id: 2, from: 'me', text: "Thank you ma'am!", time: 'Yesterday' },
     ],
     s3: [
       { id: 1, from: 'them', text: 'Your essay topic has been approved. You may start writing.', time: 'Monday' },
@@ -169,21 +157,26 @@ const messagesByRole = {
       { id: 1, from: 'them', text: 'Parent-Teacher meeting is on March 20. Please attend.', time: 'Monday' },
     ],
   },
+  principal: {
+    pr1: [{ id: 1, from: 'them', text: 'Board inspection scheduled for April 15.', time: 'Monday' }],
+    pr2: [{ id: 1, from: 'them', text: 'Week 11 lesson plans submitted.', time: '9:00 AM' }],
+    pr3: [{ id: 1, from: 'them', text: 'Science lab equipment request submitted.', time: 'Yesterday' }],
+    pr4: [{ id: 1, from: 'them', text: 'English exam papers are ready.', time: '11:00 AM' }],
+  },
 };
 
 const Messaging = () => {
   const { user } = useAuth();
-  
-  console.log('User object:', user);
-  console.log('Role detected:', role);
+
   const rawRole = user?.role_name?.toLowerCase() || user?.role?.toLowerCase() || 'teacher';
-const role = rawRole === 'admin' ? 'admin' 
-  : rawRole === 'principal' ? 'principal'
-  : rawRole === 'teacher' ? 'teacher'
-  : rawRole === 'student' ? 'student'
-  : rawRole === 'parent' ? 'parent'
-  : 'teacher';
-const menuItems = allMenuItems[role] || allMenuItems.teacher;
+  const role = rawRole === 'admin' ? 'admin'
+    : rawRole === 'principal' ? 'principal'
+    : rawRole === 'teacher' ? 'teacher'
+    : rawRole === 'student' ? 'student'
+    : rawRole === 'parent' ? 'parent'
+    : 'teacher';
+
+  const menuItems = allMenuItems[role] || allMenuItems.teacher;
   const contacts = contactsByRole[role] || [];
   const [selected, setSelected] = useState(contacts[0]);
   const [messages, setMessages] = useState(messagesByRole[role] || {});
@@ -220,7 +213,8 @@ const menuItems = allMenuItems[role] || allMenuItems.teacher;
             <Typography variant="subtitle2" fontWeight={700} color="text.secondary" mb={1}>
               {role === 'admin' ? '👥 Staff & Teachers' :
                role === 'teacher' ? '📋 My Contacts' :
-               role === 'student' ? '👨‍🏫 My Teachers' : '🏫 School Staff'}
+               role === 'student' ? '👨‍🏫 My Teachers' :
+               role === 'principal' ? '👥 My Team' : '🏫 School Staff'}
             </Typography>
             <TextField fullWidth size="small" placeholder="Search..."
               value={search} onChange={(e) => setSearch(e.target.value)}
@@ -239,12 +233,8 @@ const menuItems = allMenuItems[role] || allMenuItems.teacher;
                     </Badge>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={
-                      <Typography variant="body2" fontWeight={600}>{contact.name}</Typography>
-                    }
-                    secondary={
-                      <Typography variant="caption" color="text.secondary">{contact.role}</Typography>
-                    }
+                    primary={<Typography variant="body2" fontWeight={600}>{contact.name}</Typography>}
+                    secondary={<Typography variant="caption" color="text.secondary">{contact.role}</Typography>}
                   />
                 </ListItem>
                 <Divider />
@@ -255,7 +245,6 @@ const menuItems = allMenuItems[role] || allMenuItems.teacher;
 
         {/* Right: Chat Area */}
         <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          {/* Header */}
           <Box sx={{ p: 2, borderBottom: '1px solid #eee', display: 'flex', alignItems: 'center', gap: 2, bgcolor: 'white' }}>
             <Badge color="success" variant="dot" invisible={!selected.online}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
@@ -272,7 +261,6 @@ const menuItems = allMenuItems[role] || allMenuItems.teacher;
             </Box>
           </Box>
 
-          {/* Messages */}
           <Box sx={{
             flexGrow: 1, overflow: 'auto', p: 3,
             display: 'flex', flexDirection: 'column', gap: 1.5, bgcolor: '#f8f9fa'
@@ -308,7 +296,6 @@ const menuItems = allMenuItems[role] || allMenuItems.teacher;
             ))}
           </Box>
 
-          {/* Input */}
           <Box sx={{ p: 2, borderTop: '1px solid #eee', display: 'flex', gap: 1, bgcolor: 'white' }}>
             <TextField fullWidth size="small" placeholder={`Message ${selected.name}...`}
               value={input} onChange={(e) => setInput(e.target.value)}
