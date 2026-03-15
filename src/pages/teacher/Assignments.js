@@ -6,16 +6,9 @@ import {
   TableRow, Avatar, Alert, Tabs, Tab, CircularProgress,
   LinearProgress
 } from '@mui/material';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import QuizIcon from '@mui/icons-material/Quiz';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import MessageIcon from '@mui/icons-material/Message';
 import DownloadIcon from '@mui/icons-material/Download';
 import GradeIcon from '@mui/icons-material/Grade';
 import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import Layout from '../../components/layout/Layout';
 import { teacherMenu } from '../../components/layout/menus';
 import api from '../../services/api';
@@ -27,19 +20,18 @@ const mockAssignments = [
     submissions: [
       { id: 1, studentName: 'Aarav Sharma', submittedAt: '2026-03-09 10:30', isLate: false, status: 'submitted', hasFile: true, textContent: null, grade: null },
       { id: 2, studentName: 'Priya Patel', submittedAt: '2026-03-09 14:20', isLate: false, status: 'graded', hasFile: false, textContent: 'Furthermore, the solutions to all 20 problems are comprehensive and multifaceted. It is important to note that each equation was solved utilizing the standard quadratic formula. Moreover, the results underscore the importance of algebraic thinking.', grade: 18 },
-      { id: 3, studentName: 'Rohan Singh', submittedAt: '2026-03-11 09:00', isLate: true, status: 'submitted', hasFile: true, textContent: 'Furthermore, the solutions to all 20 problems are comprehensive and multifaceted. It is important to note that each equation was solved utilizing the standard quadratic formula. Moreover, the results underscore the importance of algebraic thinking.', grade: null },
+      { id: 3, studentName: 'Rohan Singh', submittedAt: '2026-03-11 09:00', isLate: true, status: 'submitted', hasFile: true, textContent: 'Furthermore, the solutions to all 20 problems are comprehensive and multifaceted. It is important to note that each equation was solved utilizing the standard quadratic formula.', grade: null },
     ]
   },
   {
     id: 2, title: 'Essay: Climate Change', subject: 'English',
     class: '10A', dueDate: '2026-03-08', maxMarks: 30, totalStudents: 6,
     submissions: [
-      { id: 4, studentName: 'Ananya Gupta', submittedAt: '2026-03-07 16:00', isLate: false, status: 'submitted', hasFile: true, textContent: 'Climate change is a big problem. I think we should use less plastic. My dad says the weather is getting hotter every year. We should plant more trees and use solar energy instead of coal.', grade: null },
+      { id: 4, studentName: 'Ananya Gupta', submittedAt: '2026-03-07 16:00', isLate: false, status: 'submitted', hasFile: true, textContent: 'Climate change is a big problem. I think we should use less plastic. My dad says the weather is getting hotter every year.', grade: null },
     ]
   },
 ];
 
-// Local plagiarism checker
 const checkPlagiarism = (text1, text2) => {
   if (!text1 || !text2) return 0;
   const normalize = (text) => text.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 3);
@@ -51,7 +43,6 @@ const checkPlagiarism = (text1, text2) => {
   return Math.round((intersection.size / union.size) * 100);
 };
 
-// Local AI detector
 const detectAI = (text) => {
   if (!text || text.length < 50) return { score: 0, verdict: 'Too short to analyze' };
   const aiPatterns = [
@@ -61,10 +52,7 @@ const detectAI = (text) => {
     /\b(comprehensive|multifaceted|nuanced|intricate|robust)\b/gi,
   ];
   let patternCount = 0;
-  aiPatterns.forEach(pattern => {
-    const matches = text.match(pattern);
-    if (matches) patternCount += matches.length;
-  });
+  aiPatterns.forEach(pattern => { const m = text.match(pattern); if (m) patternCount += m.length; });
   const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
   const lengths = sentences.map(s => s.trim().split(/\s+/).length);
   const avgLength = lengths.reduce((a, b) => a + b, 0) / (lengths.length || 1);
@@ -107,12 +95,10 @@ const TeacherAssignments = () => {
     setAnalyzing(true);
     setAnalysisDialog(true);
     setAnalysisResult(null);
-
     try {
       const res = await api.get(`/plagiarism/analyze/${sub.id}`);
       setAnalysisResult(res.data);
     } catch (err) {
-      // Run analysis locally using mock data
       const aiAnalysis = detectAI(sub.textContent);
       const otherSubs = selectedAssignment.submissions.filter(s => s.id !== sub.id && s.textContent);
       const plagiarismComparisons = otherSubs.map(other => ({
@@ -120,7 +106,6 @@ const TeacherAssignments = () => {
         similarity: checkPlagiarism(sub.textContent, other.textContent)
       })).sort((a, b) => b.similarity - a.similarity);
       const maxSimilarity = plagiarismComparisons.length > 0 ? plagiarismComparisons[0].similarity : 0;
-
       setAnalysisResult({
         studentName: sub.studentName,
         wordCount: sub.textContent ? sub.textContent.split(/\s+/).length : 0,
@@ -165,8 +150,7 @@ const TeacherAssignments = () => {
                   <Chip label={`${a.submissions.length}/${a.totalStudents} submitted`}
                     color={a.submissions.length === a.totalStudents ? 'success' : 'warning'} size="small" />
                   <Button variant="outlined" size="small"
-                    onClick={() => { setSelectedAssignment(a); setTab(1); }}
-                    sx={{ borderRadius: 2 }}>
+                    onClick={() => { setSelectedAssignment(a); setTab(1); }} sx={{ borderRadius: 2 }}>
                     View Submissions
                   </Button>
                 </Box>
@@ -184,82 +168,81 @@ const TeacherAssignments = () => {
                 color={selectedAssignment?.id === a.id ? 'primary' : 'default'} />
             ))}
           </Box>
-
           {selectedAssignment ? (
             <Card sx={{ borderRadius: 3 }}>
               <CardContent>
                 <Typography variant="h6" fontWeight={700} mb={2}>
                   {selectedAssignment.title} — Submissions ({selectedAssignment.submissions.length}/{selectedAssignment.totalStudents})
                 </Typography>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: '#f8f9fa' }}>
-                      <TableCell>Student</TableCell>
-                      <TableCell>Submitted At</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>File</TableCell>
-                      <TableCell>Grade</TableCell>
-                      <TableCell>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {selectedAssignment.submissions.map((sub) => (
-                      <TableRow key={sub.id} hover>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Avatar sx={{ width: 32, height: 32, fontSize: 13, bgcolor: '#1a73e8' }}>
-                              {sub.studentName.charAt(0)}
-                            </Avatar>
-                            {sub.studentName}
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">{sub.submittedAt}</Typography>
-                          {sub.isLate && <Chip label="Late" size="small" color="error" sx={{ ml: 1 }} />}
-                        </TableCell>
-                        <TableCell>
-                          <Chip label={sub.status} size="small"
-                            color={sub.status === 'graded' ? 'success' : 'warning'} />
-                        </TableCell>
-                        <TableCell>
-                          {sub.hasFile ? (
-                            <Button size="small" startIcon={<DownloadIcon />} variant="outlined" sx={{ borderRadius: 2 }}>
-                              Download
-                            </Button>
-                          ) : (
-                            <Typography variant="caption" color="text.secondary">Text submission</Typography>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {sub.grade !== null ? (
-                            <Chip label={`${sub.grade}/${selectedAssignment.maxMarks}`} color="success" size="small" />
-                          ) : '—'}
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                            <Button size="small" variant="outlined" color="warning"
-                              onClick={() => handleAnalyze(sub)}
-                              sx={{ borderRadius: 2 }}>
-                              🔍 Analyze
-                            </Button>
-                            <Button size="small" startIcon={<GradeIcon />} variant="contained"
-                              onClick={() => { setSelectedSubmission(sub); setGrade(''); setFeedback(''); setGradeDialog(true); }}
-                              sx={{ borderRadius: 2 }}>
-                              Grade
-                            </Button>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {selectedAssignment.submissions.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center">
-                          <Typography color="text.secondary" py={3}>No submissions yet</Typography>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
+                <Box sx={{ overflow: 'auto' }}>
+                  <Box sx={{ minWidth: 700 }}>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+                          <TableCell>Student</TableCell>
+                          <TableCell>Submitted At</TableCell>
+                          <TableCell>Status</TableCell>
+                          <TableCell>File</TableCell>
+                          <TableCell>Grade</TableCell>
+                          <TableCell>Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedAssignment.submissions.map((sub) => (
+                          <TableRow key={sub.id} hover>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Avatar sx={{ width: 32, height: 32, fontSize: 13, bgcolor: '#1a73e8' }}>
+                                  {sub.studentName.charAt(0)}
+                                </Avatar>
+                                {sub.studentName}
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">{sub.submittedAt}</Typography>
+                              {sub.isLate && <Chip label="Late" size="small" color="error" sx={{ ml: 1 }} />}
+                            </TableCell>
+                            <TableCell>
+                              <Chip label={sub.status} size="small" color={sub.status === 'graded' ? 'success' : 'warning'} />
+                            </TableCell>
+                            <TableCell>
+                              {sub.hasFile ? (
+                                <Button size="small" startIcon={<DownloadIcon />} variant="outlined" sx={{ borderRadius: 2 }}>Download</Button>
+                              ) : (
+                                <Typography variant="caption" color="text.secondary">Text submission</Typography>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {sub.grade !== null ? (
+                                <Chip label={`${sub.grade}/${selectedAssignment.maxMarks}`} color="success" size="small" />
+                              ) : '—'}
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                <Button size="small" variant="outlined" color="warning"
+                                  onClick={() => handleAnalyze(sub)} sx={{ borderRadius: 2 }}>
+                                  🔍 Analyze
+                                </Button>
+                                <Button size="small" startIcon={<GradeIcon />} variant="contained"
+                                  onClick={() => { setSelectedSubmission(sub); setGrade(''); setFeedback(''); setGradeDialog(true); }}
+                                  sx={{ borderRadius: 2 }}>
+                                  Grade
+                                </Button>
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        {selectedAssignment.submissions.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={6} align="center">
+                              <Typography color="text.secondary" py={3}>No submissions yet</Typography>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </Box>
+                </Box>
               </CardContent>
             </Card>
           ) : (
@@ -280,8 +263,7 @@ const TeacherAssignments = () => {
             type="number" value={grade} onChange={(e) => setGrade(e.target.value)}
             sx={{ mb: 2, mt: 1 }} inputProps={{ min: 0, max: selectedAssignment?.maxMarks }} />
           <TextField fullWidth multiline rows={3} label="Feedback for student"
-            value={feedback} onChange={(e) => setFeedback(e.target.value)}
-            placeholder="Write feedback..." />
+            value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Write feedback..." />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setGradeDialog(false)}>Cancel</Button>
@@ -314,107 +296,58 @@ const TeacherAssignments = () => {
           {analyzing && (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <CircularProgress />
-              <Typography variant="body2" mt={2} color="text.secondary">
-                Analyzing submission for AI content and plagiarism...
-              </Typography>
+              <Typography variant="body2" mt={2} color="text.secondary">Analyzing submission...</Typography>
             </Box>
           )}
-
           {analysisResult && !analyzing && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="body1" fontWeight={600}>{analysisResult.studentName}</Typography>
                 <Chip label={`${analysisResult.wordCount} words`} size="small" />
               </Box>
-
-              {/* AI Detection */}
               <Card sx={{ borderRadius: 2, bgcolor: '#f8f9fa' }}>
                 <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
                   <Typography variant="subtitle2" fontWeight={700} mb={1}>🤖 AI Detection</Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="body2">{analysisResult.aiDetection.verdict}</Typography>
-                    <Chip
-                      label={`${analysisResult.aiDetection.score}% AI`}
-                      size="small"
-                      color={
-                        analysisResult.aiDetection.score >= 70 ? 'error' :
-                        analysisResult.aiDetection.score >= 40 ? 'warning' : 'success'
-                      }
-                    />
+                    <Chip label={`${analysisResult.aiDetection.score}% AI`} size="small"
+                      color={analysisResult.aiDetection.score >= 70 ? 'error' : analysisResult.aiDetection.score >= 40 ? 'warning' : 'success'} />
                   </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={analysisResult.aiDetection.score}
-                    sx={{
-                      height: 8, borderRadius: 4, bgcolor: '#e0e0e0',
-                      '& .MuiLinearProgress-bar': {
-                        borderRadius: 4,
-                        bgcolor: analysisResult.aiDetection.score >= 70 ? '#ea4335' :
-                                 analysisResult.aiDetection.score >= 40 ? '#fbbc04' : '#34a853'
-                      }
-                    }}
-                  />
+                  <LinearProgress variant="determinate" value={analysisResult.aiDetection.score}
+                    sx={{ height: 8, borderRadius: 4, bgcolor: '#e0e0e0',
+                      '& .MuiLinearProgress-bar': { borderRadius: 4,
+                        bgcolor: analysisResult.aiDetection.score >= 70 ? '#ea4335' : analysisResult.aiDetection.score >= 40 ? '#fbbc04' : '#34a853' } }} />
                 </CardContent>
               </Card>
-
-              {/* Plagiarism */}
               <Card sx={{ borderRadius: 2, bgcolor: '#f8f9fa' }}>
                 <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 } }}>
                   <Typography variant="subtitle2" fontWeight={700} mb={1}>📄 Plagiarism Check</Typography>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Typography variant="body2">{analysisResult.plagiarism.verdict}</Typography>
-                    <Chip
-                      label={`${analysisResult.plagiarism.maxSimilarity}% match`}
-                      size="small"
-                      color={
-                        analysisResult.plagiarism.maxSimilarity >= 70 ? 'error' :
-                        analysisResult.plagiarism.maxSimilarity >= 40 ? 'warning' : 'success'
-                      }
-                    />
+                    <Chip label={`${analysisResult.plagiarism.maxSimilarity}% match`} size="small"
+                      color={analysisResult.plagiarism.maxSimilarity >= 70 ? 'error' : analysisResult.plagiarism.maxSimilarity >= 40 ? 'warning' : 'success'} />
                   </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={analysisResult.plagiarism.maxSimilarity}
-                    sx={{
-                      height: 8, borderRadius: 4, bgcolor: '#e0e0e0',
-                      '& .MuiLinearProgress-bar': {
-                        borderRadius: 4,
-                        bgcolor: analysisResult.plagiarism.maxSimilarity >= 70 ? '#ea4335' :
-                                 analysisResult.plagiarism.maxSimilarity >= 40 ? '#fbbc04' : '#34a853'
-                      }
-                    }}
-                  />
+                  <LinearProgress variant="determinate" value={analysisResult.plagiarism.maxSimilarity}
+                    sx={{ height: 8, borderRadius: 4, bgcolor: '#e0e0e0',
+                      '& .MuiLinearProgress-bar': { borderRadius: 4,
+                        bgcolor: analysisResult.plagiarism.maxSimilarity >= 70 ? '#ea4335' : analysisResult.plagiarism.maxSimilarity >= 40 ? '#fbbc04' : '#34a853' } }} />
                   {analysisResult.plagiarism.comparisons?.length > 0 && (
                     <Box mt={1.5}>
-                      <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                        Compared with:
-                      </Typography>
+                      <Typography variant="caption" color="text.secondary" fontWeight={600}>Compared with:</Typography>
                       {analysisResult.plagiarism.comparisons.slice(0, 3).map((c, i) => (
                         <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
                           <Typography variant="caption" color="text.secondary">{c.studentName}</Typography>
-                          <Chip
-                            label={`${c.similarity}% similar`}
-                            size="small"
+                          <Chip label={`${c.similarity}% similar`} size="small"
                             color={c.similarity >= 70 ? 'error' : c.similarity >= 40 ? 'warning' : 'default'}
-                            sx={{ height: 18, fontSize: 10 }}
-                          />
+                            sx={{ height: 18, fontSize: 10 }} />
                         </Box>
                       ))}
                     </Box>
                   )}
                 </CardContent>
               </Card>
-
               {!analysisResult.hasTextContent && (
-                <Alert severity="info" sx={{ borderRadius: 2 }}>
-                  This is a file submission. AI and plagiarism detection only works on text submissions.
-                </Alert>
-              )}
-
-              {analysisResult.hasTextContent && analysisResult.wordCount < 30 && (
-                <Alert severity="warning" sx={{ borderRadius: 2 }}>
-                  Submission is very short. Results may not be accurate.
-                </Alert>
+                <Alert severity="info" sx={{ borderRadius: 2 }}>File submission — AI detection only works on text submissions.</Alert>
               )}
             </Box>
           )}
@@ -423,7 +356,6 @@ const TeacherAssignments = () => {
           <Button onClick={() => setAnalysisDialog(false)} variant="outlined">Close</Button>
         </DialogActions>
       </Dialog>
-
     </Layout>
   );
 };

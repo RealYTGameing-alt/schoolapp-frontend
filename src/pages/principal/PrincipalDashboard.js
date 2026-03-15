@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Box, Card, CardContent, Grid, CircularProgress, Chip } from '@mui/material';
+import { Typography, Box, Card, CardContent, Grid, CircularProgress } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import SchoolIcon from '@mui/icons-material/School';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
@@ -93,7 +93,6 @@ const PrincipalDashboard = () => {
             </CardContent>
           </Card>
         </Grid>
-
         <Grid item xs={12} md={5}>
           <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', height: '100%' }}>
             <CardContent>

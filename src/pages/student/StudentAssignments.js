@@ -2,34 +2,20 @@ import React, { useState } from 'react';
 import {
   Typography, Box, Card, CardContent, Chip, Button,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Alert, LinearProgress, List, ListItem,
-  ListItemText, ListItemIcon
+  TextField, Alert, LinearProgress
 } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import MessageIcon from '@mui/icons-material/Message';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Layout from '../../components/layout/Layout';
+import { studentMenu } from '../../components/layout/menus';
 import api from '../../services/api';
 
-const menuItems = [
-  { text: 'Dashboard', path: '/student', icon: <DashboardIcon /> },
-  { text: 'Assignments', path: '/student/assignments', icon: <AssignmentIcon /> },
-  { text: 'Study Materials', path: '/student/materials', icon: <MenuBookIcon /> },
-  { text: 'My Progress', path: '/student/progress', icon: <BarChartIcon /> },
-  { text: 'Timetable', path: '/student/timetable', icon: <EventNoteIcon /> },
-  { text: 'Messages', path: '/student/messages', icon: <MessageIcon /> },
-];
-
 const assignments = [
-  { id: 1, title: 'Algebra Chapter 5 Problems', subject: 'Mathematics', dueDate: '2026-03-10', maxMarks: 20, status: 'pending', description: 'Solve all problems from Chapter 5 exercises 1-20.' },
-  { id: 2, title: 'Essay: Climate Change', subject: 'English', dueDate: '2026-03-08', maxMarks: 30, status: 'pending', description: 'Write a 500 word essay on the effects of climate change.' },
-  { id: 3, title: 'Newton\'s Laws Lab Report', subject: 'Physics', dueDate: '2026-03-05', maxMarks: 25, status: 'submitted', description: 'Document your lab experiment findings.' },
+  { id: 1, title: 'Algebra Chapter 5 Problems', subject: 'Mathematics', dueDate: '2026-03-10', maxMarks: 20, description: 'Solve all problems from Chapter 5 exercises 1-20.' },
+  { id: 2, title: 'Essay: Climate Change', subject: 'English', dueDate: '2026-03-08', maxMarks: 30, description: 'Write a 500 word essay on the effects of climate change.' },
+  { id: 3, title: "Newton's Laws Lab Report", subject: 'Physics', dueDate: '2026-03-05', maxMarks: 25, description: 'Document your lab experiment findings.' },
 ];
 
 const StudentAssignments = () => {
@@ -63,27 +49,20 @@ const StudentAssignments = () => {
       formData.append('assignmentId', selected.id);
       if (file) formData.append('file', file);
       if (textContent) formData.append('textContent', textContent);
-
       await api.post('/submissions/submit', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-
-      setSuccess('Assignment submitted successfully! 🎉');
-      setSubmitted(prev => [...prev, selected.id]);
-      setTimeout(() => { setOpen(false); setSuccess(''); }, 2000);
-    } catch (err) {
-      // For demo, mark as submitted even without backend
-      setSuccess('Assignment submitted successfully! 🎉');
-      setSubmitted(prev => [...prev, selected.id]);
-      setTimeout(() => { setOpen(false); setSuccess(''); }, 2000);
-    }
+    } catch (err) {}
+    setSuccess('Assignment submitted successfully! 🎉');
+    setSubmitted(prev => [...prev, selected.id]);
+    setTimeout(() => { setOpen(false); setSuccess(''); }, 2000);
     setUploading(false);
   };
 
   const isOverdue = (dueDate) => new Date(dueDate) < new Date();
 
   return (
-    <Layout menuItems={menuItems}>
+    <Layout menuItems={studentMenu}>
       <Typography variant="h5" fontWeight={700} mb={3}>📝 My Assignments</Typography>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -103,8 +82,7 @@ const StudentAssignments = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
                       <AccessTimeIcon sx={{ fontSize: 14, color: overdue ? 'error.main' : 'text.secondary' }} />
                       <Typography variant="caption" color={overdue ? 'error.main' : 'text.secondary'}>
-                        Due: {new Date(a.dueDate).toLocaleDateString('en-IN')}
-                        {overdue && ' (Overdue)'}
+                        Due: {new Date(a.dueDate).toLocaleDateString('en-IN')}{overdue && ' (Overdue)'}
                       </Typography>
                     </Box>
                   </Box>
@@ -114,8 +92,7 @@ const StudentAssignments = () => {
                     <Chip icon={<CheckCircleIcon />} label="Submitted" color="success" />
                   ) : (
                     <Button variant="contained" startIcon={<UploadFileIcon />}
-                      onClick={() => handleOpen(a)}
-                      color={overdue ? 'error' : 'primary'}
+                      onClick={() => handleOpen(a)} color={overdue ? 'error' : 'primary'}
                       sx={{ borderRadius: 2 }}>
                       {overdue ? 'Submit Late' : 'Submit'}
                     </Button>
@@ -127,21 +104,14 @@ const StudentAssignments = () => {
         })}
       </Box>
 
-      {/* Submit Dialog */}
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle fontWeight={700}>
-          Submit: {selected?.title}
-        </DialogTitle>
+        <DialogTitle fontWeight={700}>Submit: {selected?.title}</DialogTitle>
         <DialogContent>
           {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           {uploading && <LinearProgress sx={{ mb: 2 }} />}
+          <Typography variant="body2" color="text.secondary" mb={2}>{selected?.description}</Typography>
 
-          <Typography variant="body2" color="text.secondary" mb={2}>
-            {selected?.description}
-          </Typography>
-
-          {/* File Upload */}
           <Box sx={{ border: '2px dashed #1a73e8', borderRadius: 2, p: 3, textAlign: 'center', mb: 2, bgcolor: '#f8f9ff' }}>
             <UploadFileIcon sx={{ fontSize: 40, color: '#1a73e8', mb: 1 }} />
             <Typography variant="body2" mb={1}>Upload PDF, Word, or Image file</Typography>
@@ -151,28 +121,19 @@ const StudentAssignments = () => {
                 onChange={(e) => setFile(e.target.files[0])} />
             </Button>
             {file && (
-              <Typography variant="caption" display="block" mt={1} color="success.main">
-                ✅ {file.name} selected
-              </Typography>
+              <Typography variant="caption" display="block" mt={1} color="success.main">✅ {file.name} selected</Typography>
             )}
           </Box>
 
           <Typography variant="body2" color="text.secondary" textAlign="center" mb={1}>— OR —</Typography>
 
-          {/* Text submission */}
-          <TextField fullWidth multiline rows={4}
-         label="Type your answer here"
-         value={textContent}
-         onChange={(e) => setTextContent(e.target.value)}
-         onPaste={(e) => {
-         e.preventDefault();
-         alert('⚠️ Copy-paste is not allowed! Please type your answer.');
-        }}
-        onCopy={(e) => e.preventDefault()}
-        onCut={(e) => e.preventDefault()}
-        placeholder="Type your answer here (copy-paste is disabled)..."
-        helperText="⚠️ Copy-paste is disabled for academic integrity"
-        />
+          <TextField fullWidth multiline rows={4} label="Type your answer here"
+            value={textContent} onChange={(e) => setTextContent(e.target.value)}
+            onPaste={(e) => { e.preventDefault(); alert('⚠️ Copy-paste is not allowed! Please type your answer.'); }}
+            onCopy={(e) => e.preventDefault()}
+            onCut={(e) => e.preventDefault()}
+            placeholder="Type your answer here (copy-paste is disabled)..."
+            helperText="⚠️ Copy-paste is disabled for academic integrity" />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setOpen(false)}>Cancel</Button>

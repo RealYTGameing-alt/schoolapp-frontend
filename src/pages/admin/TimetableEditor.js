@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
   Typography, Box, Card, CardContent, Button, Chip,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Alert, CircularProgress, IconButton,
+  TextField, Alert, CircularProgress,
   Table, TableBody, TableCell, TableHead, TableRow, Tooltip
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import Layout from '../../components/layout/Layout';
 import { adminMenu } from '../../components/layout/menus';
@@ -34,20 +32,11 @@ const defaultPeriodTimes = {
 };
 
 const subjectColors = {
-  'Mathematics': '#1a73e8',
-  'Science': '#34a853',
-  'English': '#fbbc04',
-  'History': '#ea4335',
-  'Geography': '#9c27b0',
-  'Physics': '#00bcd4',
-  'Chemistry': '#ff5722',
-  'Biology': '#4caf50',
-  'Computer Science': '#607d8b',
-  'Physical Education': '#ff9800',
-  'Art': '#e91e63',
-  'Music': '#673ab7',
-  'Lunch Break': '#bdbdbd',
-  'Free Period': '#bdbdbd',
+  'Mathematics': '#1a73e8', 'Science': '#34a853', 'English': '#fbbc04',
+  'History': '#ea4335', 'Geography': '#9c27b0', 'Physics': '#00bcd4',
+  'Chemistry': '#ff5722', 'Biology': '#4caf50', 'Computer Science': '#607d8b',
+  'Physical Education': '#ff9800', 'Art': '#e91e63', 'Music': '#673ab7',
+  'Lunch Break': '#bdbdbd', 'Free Period': '#bdbdbd',
 };
 
 const getColor = (subject) => subjectColors[subject] || '#1a73e8';
@@ -60,14 +49,9 @@ const subjects = [
   'Physical Education', 'Art', 'Music', 'Lunch Break', 'Free Period'
 ];
 
-const teachers = [
-  'Rajesh Kumar', 'Sunita Sharma', 'Priya Menon',
-  'Amit Singh', 'Kavita Rao', 'Mohan Das', '—'
-];
+const teachers = ['Rajesh Kumar', 'Sunita Sharma', 'Priya Menon', 'Amit Singh', 'Kavita Rao', 'Mohan Das', '—'];
 
-const emptyEntry = {
-  subject: 'Mathematics', teacher: 'Rajesh Kumar', room: 'Room 201',
-};
+const emptyEntry = { subject: 'Mathematics', teacher: 'Rajesh Kumar', room: 'Room 201' };
 
 const TimetableEditor = () => {
   const [selectedClass, setSelectedClass] = useState('10A');
@@ -80,6 +64,23 @@ const TimetableEditor = () => {
   const [editingCell, setEditingCell] = useState(null);
   const [editValues, setEditValues] = useState(emptyEntry);
 
+  const generateDefault = () => {
+    const defaultEntries = [];
+    days.forEach(day => {
+      periods.forEach(period => {
+        defaultEntries.push({
+          day: day.name, dayOrder: day.order, period,
+          startTime: defaultPeriodTimes[period].start,
+          endTime: defaultPeriodTimes[period].end,
+          subject: period === 4 ? 'Lunch Break' : 'Mathematics',
+          teacher: period === 4 ? '—' : 'Rajesh Kumar',
+          room: period === 4 ? '—' : 'Room 201',
+        });
+      });
+    });
+    return defaultEntries;
+  };
+
   const fetchTimetable = async (className) => {
     setLoading(true);
     try {
@@ -87,57 +88,18 @@ const TimetableEditor = () => {
       if (res.data.timetable && res.data.timetable.length > 0) {
         setTimetable(res.data.timetable);
       } else {
-        // Generate default empty timetable
-        const defaultEntries = [];
-        days.forEach(day => {
-          periods.forEach(period => {
-            defaultEntries.push({
-              day: day.name,
-              dayOrder: day.order,
-              period,
-              startTime: defaultPeriodTimes[period].start,
-              endTime: defaultPeriodTimes[period].end,
-              subject: period === 4 ? 'Lunch Break' : 'Mathematics',
-              teacher: period === 4 ? '—' : 'Rajesh Kumar',
-              room: period === 4 ? '—' : 'Room 201',
-            });
-          });
-        });
-        setTimetable(defaultEntries);
+        setTimetable(generateDefault());
       }
     } catch (err) {
-      // Generate default timetable on error
-      const defaultEntries = [];
-      days.forEach(day => {
-        periods.forEach(period => {
-          defaultEntries.push({
-            day: day.name,
-            dayOrder: day.order,
-            period,
-            startTime: defaultPeriodTimes[period].start,
-            endTime: defaultPeriodTimes[period].end,
-            subject: period === 4 ? 'Lunch Break' : 'Mathematics',
-            teacher: period === 4 ? '—' : 'Rajesh Kumar',
-            room: period === 4 ? '—' : 'Room 201',
-          });
-        });
-      });
-      setTimetable(defaultEntries);
+      setTimetable(generateDefault());
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    fetchTimetable(selectedClass);
-  }, [selectedClass]);
+  useEffect(() => { fetchTimetable(selectedClass); }, [selectedClass]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const getCell = (day, period) => {
-    return timetable.find(e =>
-      e.day === day && e.period === period
-    ) || timetable.find(e =>
-      e.day === day && (e.period === period || e.period_number === period)
-    );
-  };
+  const getCell = (day, period) =>
+    timetable.find(e => e.day === day && e.period === period);
 
   const handleEditCell = (day, period) => {
     const cell = getCell(day, period);
@@ -155,16 +117,12 @@ const TimetableEditor = () => {
       const exists = prev.find(e => e.day === editingCell.day && e.period === editingCell.period);
       if (exists) {
         return prev.map(e =>
-          e.day === editingCell.day && e.period === editingCell.period
-            ? { ...e, ...editValues }
-            : e
+          e.day === editingCell.day && e.period === editingCell.period ? { ...e, ...editValues } : e
         );
       } else {
         const dayObj = days.find(d => d.name === editingCell.day);
         return [...prev, {
-          day: editingCell.day,
-          dayOrder: dayObj?.order || 1,
-          period: editingCell.period,
+          day: editingCell.day, dayOrder: dayObj?.order || 1, period: editingCell.period,
           startTime: defaultPeriodTimes[editingCell.period]?.start || '',
           endTime: defaultPeriodTimes[editingCell.period]?.end || '',
           ...editValues,
@@ -180,24 +138,19 @@ const TimetableEditor = () => {
     setSaving(true);
     setError('');
     try {
-      await api.post('/timetable/save', {
-        className: selectedClass,
-        entries: timetable,
-      });
+      await api.post('/timetable/save', { className: selectedClass, entries: timetable });
       setSuccess(`✅ Timetable for Class ${selectedClass} saved successfully!`);
-      setTimeout(() => setSuccess(''), 4000);
     } catch (err) {
       setSuccess(`✅ Timetable for Class ${selectedClass} saved!`);
-      setTimeout(() => setSuccess(''), 4000);
     }
+    setTimeout(() => setSuccess(''), 4000);
     setSaving(false);
   };
 
   const handleClearCell = (day, period) => {
     setTimetable(prev => prev.map(e =>
       e.day === day && e.period === period
-        ? { ...e, subject: 'Free Period', teacher: '—', room: '—' }
-        : e
+        ? { ...e, subject: 'Free Period', teacher: '—', room: '—' } : e
     ));
   };
 
@@ -206,12 +159,9 @@ const TimetableEditor = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h5" fontWeight={700}>📅 Timetable Editor</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Click any cell to edit • Changes are saved per class
-          </Typography>
+          <Typography variant="body2" color="text.secondary">Click any cell to edit • Changes are saved per class</Typography>
         </Box>
-        <Button variant="contained" startIcon={<SaveIcon />}
-          onClick={handleSaveTimetable} disabled={saving}
+        <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSaveTimetable} disabled={saving}
           sx={{ borderRadius: 2, bgcolor: '#34a853', '&:hover': { bgcolor: '#2d9249' } }}>
           {saving ? 'Saving...' : `Save Class ${selectedClass} Timetable`}
         </Button>
@@ -220,27 +170,22 @@ const TimetableEditor = () => {
       {success && <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>{success}</Alert>}
       {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
 
-      {/* Class selector */}
       <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', mb: 3 }}>
         <CardContent>
           <Typography variant="subtitle2" fontWeight={700} mb={1.5}>Select Class:</Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {classes.map(cls => (
-              <Chip key={cls} label={cls}
-                onClick={() => setSelectedClass(cls)}
+              <Chip key={cls} label={cls} onClick={() => setSelectedClass(cls)}
                 color={selectedClass === cls ? 'primary' : 'default'}
                 variant={selectedClass === cls ? 'filled' : 'outlined'}
-                sx={{ cursor: 'pointer', fontWeight: selectedClass === cls ? 700 : 400 }}
-              />
+                sx={{ cursor: 'pointer', fontWeight: selectedClass === cls ? 700 : 400 }} />
             ))}
           </Box>
         </CardContent>
       </Card>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-          <CircularProgress />
-        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
       ) : (
         <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', overflow: 'auto' }}>
           <CardContent sx={{ p: 0, overflow: 'auto' }}>
@@ -251,19 +196,14 @@ const TimetableEditor = () => {
                     <TableCell sx={{ color: 'white', fontWeight: 700, width: 80 }}>Period</TableCell>
                     <TableCell sx={{ color: 'white', fontWeight: 700, width: 100 }}>Time</TableCell>
                     {days.map(day => (
-                      <TableCell key={day.name} align="center"
-                        sx={{ color: 'white', fontWeight: 700 }}>
-                        {day.name}
-                      </TableCell>
+                      <TableCell key={day.name} align="center" sx={{ color: 'white', fontWeight: 700 }}>{day.name}</TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {periods.map(period => (
                     <TableRow key={period} hover>
-                      <TableCell sx={{ bgcolor: '#f8f9fa', fontWeight: 700, fontSize: 13 }}>
-                        P{period}
-                      </TableCell>
+                      <TableCell sx={{ bgcolor: '#f8f9fa', fontWeight: 700, fontSize: 13 }}>P{period}</TableCell>
                       <TableCell sx={{ bgcolor: '#f8f9fa', fontSize: 11, color: '#666' }}>
                         {defaultPeriodTimes[period]?.start}<br />{defaultPeriodTimes[period]?.end}
                       </TableCell>
@@ -272,32 +212,20 @@ const TimetableEditor = () => {
                         const isBreak = cell?.subject === 'Lunch Break' || cell?.subject === 'Free Period';
                         return (
                           <TableCell key={day.name} align="center" sx={{ p: 0.5 }}>
-                            <Box
-                              sx={{
-                                p: 1, borderRadius: 2, cursor: 'pointer',
-                                bgcolor: isBreak ? '#f5f5f5' : (getColor(cell?.subject || '') + '15'),
-                                borderLeft: `3px solid ${isBreak ? '#e0e0e0' : getColor(cell?.subject || '')}`,
-                                transition: 'all 0.15s',
-                                '&:hover': {
-                                  bgcolor: isBreak ? '#eee' : (getColor(cell?.subject || '') + '30'),
-                                  transform: 'scale(1.02)',
-                                },
-                                minHeight: 60,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                              }}
-                              onClick={() => handleEditCell(day.name, period)}
-                            >
+                            <Box onClick={() => handleEditCell(day.name, period)} sx={{
+                              p: 1, borderRadius: 2, cursor: 'pointer',
+                              bgcolor: isBreak ? '#f5f5f5' : (getColor(cell?.subject || '') + '15'),
+                              borderLeft: `3px solid ${isBreak ? '#e0e0e0' : getColor(cell?.subject || '')}`,
+                              transition: 'all 0.15s',
+                              '&:hover': { bgcolor: isBreak ? '#eee' : (getColor(cell?.subject || '') + '30'), transform: 'scale(1.02)' },
+                              minHeight: 60, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+                            }}>
                               <Typography variant="caption" fontWeight={700}
-                                color={isBreak ? 'text.secondary' : getColor(cell?.subject || '')}
-                                display="block">
+                                color={isBreak ? 'text.secondary' : getColor(cell?.subject || '')} display="block">
                                 {cell?.subject || '+ Add'}
                               </Typography>
                               {!isBreak && cell?.room && (
-                                <Typography variant="caption" color="text.secondary" display="block" fontSize={10}>
-                                  {cell.room}
-                                </Typography>
+                                <Typography variant="caption" color="text.secondary" display="block" fontSize={10}>{cell.room}</Typography>
                               )}
                               {!isBreak && (
                                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 0.3 }}>
@@ -319,25 +247,20 @@ const TimetableEditor = () => {
         </Card>
       )}
 
-      {/* Subject legend */}
       <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', mt: 3 }}>
         <CardContent>
           <Typography variant="subtitle2" fontWeight={700} mb={1.5}>📚 Subject Colors</Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {subjects.filter(s => s !== 'Lunch Break' && s !== 'Free Period').map(subj => (
               <Chip key={subj} label={subj} size="small"
-                sx={{ bgcolor: getColor(subj) + '20', color: getColor(subj),
-                      fontWeight: 600, border: `1px solid ${getColor(subj)}40` }} />
+                sx={{ bgcolor: getColor(subj) + '20', color: getColor(subj), fontWeight: 600, border: `1px solid ${getColor(subj)}40` }} />
             ))}
           </Box>
         </CardContent>
       </Card>
 
-      {/* Edit Cell Dialog */}
       <Dialog open={editDialog} onClose={() => setEditDialog(false)} maxWidth="xs" fullWidth>
-        <DialogTitle fontWeight={700}>
-          ✏️ Edit — {editingCell?.day} Period {editingCell?.period}
-        </DialogTitle>
+        <DialogTitle fontWeight={700}>✏️ Edit — {editingCell?.day} Period {editingCell?.period}</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
           <TextField label="Subject" select fullWidth value={editValues.subject}
             onChange={e => setEditValues({...editValues, subject: e.target.value})}
