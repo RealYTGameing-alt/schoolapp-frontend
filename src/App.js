@@ -1,3 +1,4 @@
+import Landing from './pages/Landing';
 import TimetableEditor from './pages/admin/TimetableEditor';
 import UserManagement from './pages/admin/UserManagement';
 import React from 'react';
@@ -65,7 +66,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-
+          <Route path="/" element={<Landing />} />
           {/* Admin */}
           <Route path="/admin" element={<PrivateRoute role="admin"><AdminDashboard /></PrivateRoute>} />
           <Route path="/admin/students" element={<PrivateRoute role="admin"><Students /></PrivateRoute>} />
