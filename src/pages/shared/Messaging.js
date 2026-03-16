@@ -27,6 +27,8 @@ const allMenuItems = {
     { text: 'Staff & HR', path: '/admin/staff', icon: <PeopleIcon /> },
     { text: 'Fee Management', path: '/admin/fees', icon: <AttachMoneyIcon /> },
     { text: 'Admissions', path: '/admin/admissions', icon: <AssignmentIcon /> },
+    { text: 'Timetable Editor', path: '/admin/timetable', icon: <EventNoteIcon /> },
+    { text: 'User Management', path: '/admin/users', icon: <PeopleIcon /> },
     { text: 'Calendar', path: '/admin/calendar', icon: <EventNoteIcon /> },
     { text: 'Messages', path: '/admin/messages', icon: <MessageIcon /> },
     { text: 'Reports', path: '/admin/reports', icon: <BarChartIcon /> },
@@ -37,6 +39,7 @@ const allMenuItems = {
     { text: 'Assignments', path: '/teacher/assignments', icon: <AssignmentIcon /> },
     { text: 'Exams', path: '/teacher/exams', icon: <QuizIcon /> },
     { text: 'Lesson Plans', path: '/teacher/lessons', icon: <MenuBookIcon /> },
+    { text: 'Study Materials', path: '/teacher/materials', icon: <MenuBookIcon /> },
     { text: 'Messages', path: '/teacher/messages', icon: <MessageIcon /> },
   ],
   student: [
@@ -45,6 +48,7 @@ const allMenuItems = {
     { text: 'Study Materials', path: '/student/materials', icon: <MenuBookIcon /> },
     { text: 'My Progress', path: '/student/progress', icon: <BarChartIcon /> },
     { text: 'Timetable', path: '/student/timetable', icon: <EventNoteIcon /> },
+    { text: 'Calendar', path: '/student/calendar', icon: <EventNoteIcon /> },
     { text: 'Messages', path: '/student/messages', icon: <MessageIcon /> },
   ],
   parent: [
