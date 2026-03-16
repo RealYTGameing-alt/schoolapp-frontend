@@ -31,6 +31,7 @@ export const teacherMenu = [
   { text: 'Exams', path: '/teacher/exams', icon: <QuizIcon /> },
   { text: 'Lesson Plans', path: '/teacher/lessons', icon: <MenuBookIcon /> },
   { text: 'Messages', path: '/teacher/messages', icon: <MessageIcon /> },
+  { text: 'Study Materials', path: '/teacher/materials', icon: <MenuBookIcon /> },
 ];
 
 export const studentMenu = [

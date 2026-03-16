@@ -8,6 +8,7 @@ import PrivateRoute from './components/common/PrivateRoute';
 import { createTheme, ThemeProvider } from '@mui/material';
 import MyProfile from './pages/shared/MyProfile';
 import StudentCalendar from './pages/student/StudentCalendar';
+import TeacherStudyMaterials from './pages/teacher/StudyMaterials';
 
 // Principal
 import PrincipalDashboard from './pages/principal/PrincipalDashboard';
@@ -89,6 +90,7 @@ function App() {
           <Route path="/teacher/lessons" element={<PrivateRoute role="teacher"><LessonPlans /></PrivateRoute>} />
           <Route path="/teacher/messages" element={<PrivateRoute role="teacher"><Messaging /></PrivateRoute>} />
           <Route path="/teacher/profile" element={<PrivateRoute role="teacher"><MyProfile /></PrivateRoute>} />
+          <Route path="/teacher/materials" element={<PrivateRoute role="teacher"><TeacherStudyMaterials /></PrivateRoute>} />
 
           {/* Student */}
           <Route path="/student" element={<PrivateRoute role="student"><StudentDashboard /></PrivateRoute>} />
