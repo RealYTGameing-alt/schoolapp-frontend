@@ -39,11 +39,8 @@ const Login = () => {
       });
 
       const { user, token } = res.data;
-
-      // Save to AuthContext
       login(user, token);
 
-      // Redirect based on role
       const role = user?.role_name?.toLowerCase();
       if (role === 'admin') navigate('/admin');
       else if (role === 'principal') navigate('/principal');
@@ -85,6 +82,7 @@ const Login = () => {
     }}>
       <Box sx={{ width: '100%', maxWidth: 420 }}>
 
+        {/* Logo + Landing Page Button */}
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Typography variant="h4" fontWeight={800} color="#1a73e8">
             🎓 EduManage Pro
@@ -92,8 +90,16 @@ const Login = () => {
           <Typography variant="body2" color="text.secondary" mt={0.5}>
             School Management System
           </Typography>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => navigate('/')}
+            sx={{ mt: 1.5, borderRadius: 2, fontSize: 12, color: '#1a73e8', borderColor: '#1a73e8' }}>
+            🌐 Visit Landing Page
+          </Button>
         </Box>
 
+        {/* Login Card */}
         <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h6" fontWeight={700} mb={2.5}>Welcome back 👋</Typography>
@@ -130,6 +136,7 @@ const Login = () => {
           </CardContent>
         </Card>
 
+        {/* Demo Accounts */}
         <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', mt: 2 }}>
           <CardContent sx={{ p: 2 }}>
             <Typography variant="caption" color="text.secondary" fontWeight={600} display="block" mb={1.5}>
