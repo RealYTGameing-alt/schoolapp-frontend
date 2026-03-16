@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Typography, Box, Card, CardContent, Chip,
-  CircularProgress, Grid, LinearProgress, Avatar
+  CircularProgress, Grid, LinearProgress, Avatar,
+  Table, TableHead, TableBody, TableRow, TableCell
 } from '@mui/material';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -13,7 +14,6 @@ import { studentMenu } from '../../components/layout/menus';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
-// Demo data for charts
 const demoSubjectScores = [
   { subject: 'Mathematics', score: 88, fullMark: 100 },
   { subject: 'Science', score: 92, fullMark: 100 },
@@ -52,6 +52,7 @@ const MyProgress = () => {
   const { user } = useAuth();
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [examResults, setExamResults] = useState([]);
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -60,7 +61,6 @@ const MyProgress = () => {
         const res = await api.get('/progress/student');
         setProgress(res.data);
       } catch (err) {
-        // Use demo data
         setProgress({
           attendanceRate: 92,
           present: 46,
@@ -74,6 +74,10 @@ const MyProgress = () => {
           attendanceByMonth: [],
         });
       }
+      try {
+        const examRes = await api.get('/exams/my-results');
+        setExamResults(examRes.data.results || []);
+      } catch (err) {}
       setLoading(false);
     };
     fetchProgress();
@@ -147,6 +151,7 @@ const MyProgress = () => {
       </Grid>
 
       <Grid container spacing={3}>
+
         {/* Subject Performance Radar */}
         <Grid item xs={12} md={6}>
           <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
@@ -237,9 +242,7 @@ const MyProgress = () => {
                         <LinearProgress variant="determinate" value={pct}
                           sx={{
                             height: 5, borderRadius: 3, bgcolor: '#f0f0f0',
-                            '& .MuiLinearProgress-bar': {
-                              bgcolor: g?.color, borderRadius: 3
-                            }
+                            '& .MuiLinearProgress-bar': { bgcolor: g?.color, borderRadius: 3 }
                           }} />
                       )}
                     </Box>
@@ -279,6 +282,65 @@ const MyProgress = () => {
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Exam Results */}
+        <Grid item xs={12}>
+          <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <CardContent>
+              <Typography variant="h6" fontWeight={700} mb={2}>🏆 Exam Results</Typography>
+              {examResults.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 3 }}>
+                  <Typography color="text.secondary">No exam results yet</Typography>
+                </Box>
+              ) : (
+                <Box sx={{ overflow: 'auto' }}>
+                  <Box sx={{ minWidth: 500 }}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ bgcolor: '#f8f9fa' }}>
+                          <TableCell>Exam</TableCell>
+                          <TableCell>Date</TableCell>
+                          <TableCell>Marks</TableCell>
+                          <TableCell>Grade</TableCell>
+                          <TableCell>Result</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {examResults.map((r, i) => {
+                          const pct = Math.round((r.marks_obtained / r.total_marks) * 100);
+                          const g = gradeLabel(pct);
+                          const passed = pct >= 33;
+                          return (
+                            <TableRow key={i} hover>
+                              <TableCell>
+                                <Typography variant="body2" fontWeight={600}>{r.exam_title}</Typography>
+                              </TableCell>
+                              <TableCell>{new Date(r.exam_date).toLocaleDateString('en-IN')}</TableCell>
+                              <TableCell>
+                                <Typography variant="body2" fontWeight={600}>
+                                  {r.marks_obtained}/{r.total_marks}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Chip label={g.label} size="small"
+                                  sx={{ bgcolor: g.color + '20', color: g.color, fontWeight: 700 }} />
+                              </TableCell>
+                              <TableCell>
+                                <Chip label={passed ? '✅ Pass' : '❌ Fail'} size="small"
+                                  color={passed ? 'success' : 'error'} />
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </Box>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
       </Grid>
     </Layout>
   );
