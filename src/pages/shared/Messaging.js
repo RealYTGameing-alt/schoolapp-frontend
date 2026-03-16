@@ -6,66 +6,19 @@ import {
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import SearchIcon from '@mui/icons-material/Search';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import MessageIcon from '@mui/icons-material/Message';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import QuizIcon from '@mui/icons-material/Quiz';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import SchoolIcon from '@mui/icons-material/School';
-import PeopleIcon from '@mui/icons-material/People';
 import Layout from '../../components/layout/Layout';
 import { useAuth } from '../../context/AuthContext';
+import {
+  adminMenu, teacherMenu, studentMenu,
+  parentMenu, principalMenu
+} from '../../components/layout/menus';
 
 const allMenuItems = {
-  admin: [
-    { text: 'Dashboard', path: '/admin', icon: <DashboardIcon /> },
-    { text: 'Students', path: '/admin/students', icon: <SchoolIcon /> },
-    { text: 'Staff & HR', path: '/admin/staff', icon: <PeopleIcon /> },
-    { text: 'Fee Management', path: '/admin/fees', icon: <AttachMoneyIcon /> },
-    { text: 'Admissions', path: '/admin/admissions', icon: <AssignmentIcon /> },
-    { text: 'Timetable Editor', path: '/admin/timetable', icon: <EventNoteIcon /> },
-    { text: 'User Management', path: '/admin/users', icon: <PeopleIcon /> },
-    { text: 'Calendar', path: '/admin/calendar', icon: <EventNoteIcon /> },
-    { text: 'Messages', path: '/admin/messages', icon: <MessageIcon /> },
-    { text: 'Reports', path: '/admin/reports', icon: <BarChartIcon /> },
-  ],
-  teacher: [
-    { text: 'Dashboard', path: '/teacher', icon: <DashboardIcon /> },
-    { text: 'Attendance', path: '/teacher/attendance', icon: <CheckCircleIcon /> },
-    { text: 'Assignments', path: '/teacher/assignments', icon: <AssignmentIcon /> },
-    { text: 'Exams', path: '/teacher/exams', icon: <QuizIcon /> },
-    { text: 'Lesson Plans', path: '/teacher/lessons', icon: <MenuBookIcon /> },
-    { text: 'Study Materials', path: '/teacher/materials', icon: <MenuBookIcon /> },
-    { text: 'Messages', path: '/teacher/messages', icon: <MessageIcon /> },
-  ],
-  student: [
-    { text: 'Dashboard', path: '/student', icon: <DashboardIcon /> },
-    { text: 'Assignments', path: '/student/assignments', icon: <AssignmentIcon /> },
-    { text: 'Study Materials', path: '/student/materials', icon: <MenuBookIcon /> },
-    { text: 'My Progress', path: '/student/progress', icon: <BarChartIcon /> },
-    { text: 'Timetable', path: '/student/timetable', icon: <EventNoteIcon /> },
-    { text: 'Calendar', path: '/student/calendar', icon: <EventNoteIcon /> },
-    { text: 'Messages', path: '/student/messages', icon: <MessageIcon /> },
-  ],
-  parent: [
-    { text: 'Dashboard', path: '/parent', icon: <DashboardIcon /> },
-    { text: "Child's Progress", path: '/parent/progress', icon: <BarChartIcon /> },
-    { text: 'Fee Payments', path: '/parent/fees', icon: <AttachMoneyIcon /> },
-    { text: 'Messages', path: '/parent/messages', icon: <MessageIcon /> },
-    { text: 'School Calendar', path: '/parent/calendar', icon: <EventNoteIcon /> },
-  ],
-  principal: [
-    { text: 'Dashboard', path: '/principal', icon: <DashboardIcon /> },
-    { text: 'Teachers', path: '/principal/teachers', icon: <PeopleIcon /> },
-    { text: 'Students', path: '/principal/students', icon: <SchoolIcon /> },
-    { text: 'Attendance Reports', path: '/principal/attendance', icon: <CheckCircleIcon /> },
-    { text: 'Announcements', path: '/principal/announcements', icon: <MessageIcon /> },
-    { text: 'Messages', path: '/principal/messages', icon: <MessageIcon /> },
-  ],
+  admin: adminMenu,
+  teacher: teacherMenu,
+  student: studentMenu,
+  parent: parentMenu,
+  principal: principalMenu,
 };
 
 const contactsByRole = {
@@ -210,7 +163,6 @@ const Messaging = () => {
         display: 'flex', height: '75vh', bgcolor: 'white', borderRadius: 3,
         boxShadow: '0 2px 12px rgba(0,0,0,0.08)', overflow: 'hidden'
       }}>
-
         {/* Left: Contact List */}
         <Box sx={{ width: 300, borderRight: '1px solid #eee', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <Box sx={{ p: 2, borderBottom: '1px solid #f0f0f0' }}>
@@ -307,8 +259,7 @@ const Messaging = () => {
               sx={{ bgcolor: '#f8f9fa', borderRadius: 3 }}
             />
             <Button variant="contained" onClick={sendMessage}
-              disabled={!input.trim()}
-              sx={{ borderRadius: 2, minWidth: 48, px: 2 }}>
+              disabled={!input.trim()} sx={{ borderRadius: 2, minWidth: 48, px: 2 }}>
               <SendIcon fontSize="small" />
             </Button>
           </Box>
