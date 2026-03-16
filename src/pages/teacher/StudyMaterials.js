@@ -3,12 +3,13 @@ import {
   Typography, Box, Card, CardContent, Button, Chip,
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Alert, CircularProgress, IconButton,
-  Tooltip, Grid, InputAdornment
+  Tooltip, Grid, InputAdornment, LinearProgress
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import SearchIcon from '@mui/icons-material/Search';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import ImageIcon from '@mui/icons-material/Image';
@@ -16,6 +17,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import Layout from '../../components/layout/Layout';
 import { teacherMenu } from '../../components/layout/menus';
 import api from '../../services/api';
+import { uploadFile } from '../../services/uploadService';
 
 const subjectColors = {
   'Mathematics': '#1a73e8', 'Science': '#34a853', 'English': '#fbbc04',
@@ -24,11 +26,8 @@ const subjectColors = {
 };
 
 const materialTypeIcons = {
-  document: <ArticleIcon />,
-  pdf: <PictureAsPdfIcon />,
-  video: <VideoLibraryIcon />,
-  image: <ImageIcon />,
-  notes: <ArticleIcon />,
+  document: <ArticleIcon />, pdf: <PictureAsPdfIcon />,
+  video: <VideoLibraryIcon />, image: <ImageIcon />, notes: <ArticleIcon />,
 };
 
 const materialTypeColors = {
@@ -38,7 +37,7 @@ const materialTypeColors = {
 
 const demoMaterials = [
   { id: 1, title: 'Algebra Chapter 5 Notes', description: 'Complete notes for quadratic equations', subject_id: 'Mathematics', class_id: '10A', material_type: 'notes', teacher_name: 'You', created_at: '2026-03-10', file_url: null },
-  { id: 2, title: 'Newton\'s Laws PDF', description: 'Detailed explanation with examples', subject_id: 'Science', class_id: '9B', material_type: 'pdf', teacher_name: 'You', created_at: '2026-03-08', file_url: null },
+  { id: 2, title: "Newton's Laws PDF", description: 'Detailed explanation with examples', subject_id: 'Science', class_id: '9B', material_type: 'pdf', teacher_name: 'You', created_at: '2026-03-08', file_url: null },
   { id: 3, title: 'English Grammar Guide', description: 'Tenses and sentence construction', subject_id: 'English', class_id: '10A', material_type: 'document', teacher_name: 'You', created_at: '2026-03-05', file_url: null },
 ];
 
@@ -49,7 +48,11 @@ const TeacherStudyMaterials = () => {
   const [addDialog, setAddDialog] = useState(false);
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [filterSubject, setFilterSubject] = useState('All');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadMode, setUploadMode] = useState('file'); // 'file' or 'link'
   const [newMaterial, setNewMaterial] = useState({
     title: '', description: '', subject: 'Mathematics',
     className: '10A', materialType: 'notes', fileUrl: ''
@@ -68,10 +71,41 @@ const TeacherStudyMaterials = () => {
 
   useEffect(() => { fetchMaterials(); }, []);
 
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setSelectedFile(file);
+    // Auto detect type
+    if (file.name.endsWith('.pdf')) setNewMaterial(p => ({...p, materialType: 'pdf'}));
+    else if (file.name.match(/\.(jpg|jpeg|png|gif)$/)) setNewMaterial(p => ({...p, materialType: 'image'}));
+    else if (file.name.match(/\.(mp4|mov|avi)$/)) setNewMaterial(p => ({...p, materialType: 'video'}));
+    else setNewMaterial(p => ({...p, materialType: 'document'}));
+  };
+
   const handleAdd = async () => {
     setSaving(true);
+    let fileUrl = newMaterial.fileUrl;
+
+    // Upload file to Cloudinary if selected
+    if (selectedFile && uploadMode === 'file') {
+      setUploading(true);
+      setUploadProgress(0);
+      try {
+        const uploadResult = await uploadFile(selectedFile, 'material');
+        fileUrl = uploadResult.url;
+        setUploadProgress(100);
+      } catch (err) {
+        setSaving(false);
+        setUploading(false);
+        setSuccess('❌ File upload failed. Try a link instead.');
+        setTimeout(() => setSuccess(''), 3000);
+        return;
+      }
+      setUploading(false);
+    }
+
     try {
-      await api.post('/materials', newMaterial);
+      await api.post('/materials', { ...newMaterial, fileUrl });
       fetchMaterials();
     } catch (err) {
       setMaterials(prev => [{
@@ -81,14 +115,17 @@ const TeacherStudyMaterials = () => {
         subject_id: newMaterial.subject,
         class_id: newMaterial.className,
         material_type: newMaterial.materialType,
-        file_url: newMaterial.fileUrl || null,
+        file_url: fileUrl || null,
         teacher_name: 'You',
         created_at: new Date().toISOString(),
       }, ...prev]);
     }
+
     setSuccess('✅ Study material added successfully!');
     setAddDialog(false);
     setNewMaterial({ title: '', description: '', subject: 'Mathematics', className: '10A', materialType: 'notes', fileUrl: '' });
+    setSelectedFile(null);
+    setUploadProgress(0);
     setSaving(false);
     setTimeout(() => setSuccess(''), 3000);
   };
@@ -123,9 +160,8 @@ const TeacherStudyMaterials = () => {
         </Button>
       </Box>
 
-      {success && <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>{success}</Alert>}
+      {success && <Alert severity={success.includes('❌') ? 'error' : 'success'} sx={{ mb: 2, borderRadius: 2 }}>{success}</Alert>}
 
-      {/* Search and filter */}
       <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
         <TextField placeholder="Search materials..." size="small"
           value={search} onChange={e => setSearch(e.target.value)}
@@ -179,17 +215,13 @@ const TeacherStudyMaterials = () => {
                   <Typography variant="body1" fontWeight={700} mb={0.5} sx={{
                     display: '-webkit-box', WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                  }}>
-                    {m.title}
-                  </Typography>
+                  }}>{m.title}</Typography>
 
                   {m.description && (
                     <Typography variant="caption" color="text.secondary" display="block" mb={1.5} sx={{
                       display: '-webkit-box', WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical', overflow: 'hidden'
-                    }}>
-                      {m.description}
-                    </Typography>
+                    }}>{m.description}</Typography>
                   )}
 
                   <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5 }}>
@@ -211,7 +243,7 @@ const TeacherStudyMaterials = () => {
                     {m.file_url ? (
                       <Button size="small" variant="outlined" startIcon={<DownloadIcon />}
                         href={m.file_url} target="_blank" sx={{ borderRadius: 2, fontSize: 11 }}>
-                        Download
+                        Open
                       </Button>
                     ) : (
                       <Chip label="No file" size="small" sx={{ fontSize: 10 }} />
@@ -251,19 +283,53 @@ const TeacherStudyMaterials = () => {
             <option value="notes">📝 Notes</option>
             <option value="document">📄 Document</option>
             <option value="pdf">📕 PDF</option>
-            <option value="video">🎥 Video Link</option>
+            <option value="video">🎥 Video</option>
             <option value="image">🖼️ Image</option>
           </TextField>
-          <TextField label="File URL or Link (optional)" fullWidth value={newMaterial.fileUrl}
-            onChange={e => setNewMaterial({...newMaterial, fileUrl: e.target.value})}
-            placeholder="https://drive.google.com/... or any link"
-            helperText="Paste a Google Drive link, YouTube link, or any URL" />
+
+          {/* Upload mode toggle */}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Chip label="📁 Upload File" onClick={() => setUploadMode('file')}
+              color={uploadMode === 'file' ? 'primary' : 'default'}
+              variant={uploadMode === 'file' ? 'filled' : 'outlined'}
+              sx={{ cursor: 'pointer', flex: 1 }} />
+            <Chip label="🔗 Paste Link" onClick={() => setUploadMode('link')}
+              color={uploadMode === 'link' ? 'primary' : 'default'}
+              variant={uploadMode === 'link' ? 'filled' : 'outlined'}
+              sx={{ cursor: 'pointer', flex: 1 }} />
+          </Box>
+
+          {uploadMode === 'file' ? (
+            <Box sx={{ border: '2px dashed #1a73e8', borderRadius: 2, p: 3, textAlign: 'center', bgcolor: '#f8f9ff' }}>
+              <UploadFileIcon sx={{ fontSize: 40, color: '#1a73e8', mb: 1 }} />
+              <Typography variant="body2" mb={1}>
+                {selectedFile ? `✅ ${selectedFile.name}` : 'Upload PDF, Word, Image, Video (max 50MB)'}
+              </Typography>
+              <Button variant="outlined" component="label" size="small" sx={{ borderRadius: 2 }}>
+                {selectedFile ? 'Change File' : 'Choose File'}
+                <input type="file" hidden
+                  accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4,.txt"
+                  onChange={handleFileSelect} />
+              </Button>
+              {uploading && (
+                <Box sx={{ mt: 2 }}>
+                  <LinearProgress variant="determinate" value={uploadProgress} sx={{ borderRadius: 2 }} />
+                  <Typography variant="caption" color="text.secondary">Uploading to Cloudinary...</Typography>
+                </Box>
+              )}
+            </Box>
+          ) : (
+            <TextField label="Paste Link" fullWidth value={newMaterial.fileUrl}
+              onChange={e => setNewMaterial({...newMaterial, fileUrl: e.target.value})}
+              placeholder="https://drive.google.com/... or YouTube link"
+              helperText="Google Drive, YouTube, OneDrive or any public link" />
+          )}
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setAddDialog(false)}>Cancel</Button>
+          <Button onClick={() => { setAddDialog(false); setSelectedFile(null); }}>Cancel</Button>
           <Button variant="contained" onClick={handleAdd}
-            disabled={!newMaterial.title || saving}>
-            {saving ? 'Saving...' : 'Add Material'}
+            disabled={!newMaterial.title || saving || uploading}>
+            {saving ? 'Saving...' : uploading ? 'Uploading...' : 'Add Material'}
           </Button>
         </DialogActions>
       </Dialog>

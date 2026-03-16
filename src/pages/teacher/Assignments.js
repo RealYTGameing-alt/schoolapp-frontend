@@ -9,9 +9,11 @@ import {
 import DownloadIcon from '@mui/icons-material/Download';
 import GradeIcon from '@mui/icons-material/Grade';
 import AddIcon from '@mui/icons-material/Add';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Layout from '../../components/layout/Layout';
 import { teacherMenu } from '../../components/layout/menus';
 import api from '../../services/api';
+import { uploadFile } from '../../services/uploadService';
 
 const mockAssignments = [
   {
@@ -85,6 +87,8 @@ const TeacherAssignments = () => {
   const [analysisDialog, setAnalysisDialog] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [assignmentFile, setAssignmentFile] = useState(null);
+  const [assignmentUploading, setAssignmentUploading] = useState(false);
 
   const handleGrade = () => {
     setSuccess(`✅ Graded ${selectedSubmission.studentName}: ${grade} marks`);
@@ -121,6 +125,24 @@ const TeacherAssignments = () => {
     setAnalyzing(false);
   };
 
+  const handleCreate = async () => {
+    let fileUrl = null;
+    if (assignmentFile) {
+      setAssignmentUploading(true);
+      try {
+        const result = await uploadFile(assignmentFile, 'assignment');
+        fileUrl = result.url;
+      } catch (err) {
+        console.error('Upload failed:', err);
+      }
+      setAssignmentUploading(false);
+    }
+    setCreateDialog(false);
+    setAssignmentFile(null);
+    setSuccess(`✅ Assignment created!${fileUrl ? ' File attached.' : ''}`);
+    setTimeout(() => setSuccess(''), 3000);
+  };
+
   return (
     <Layout menuItems={teacherMenu}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -129,6 +151,8 @@ const TeacherAssignments = () => {
           Create Assignment
         </Button>
       </Box>
+
+      {success && <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>{success}</Alert>}
 
       <Tabs value={tab} onChange={(e, v) => setTab(v)} sx={{ mb: 3 }}>
         <Tab label="All Assignments" />
@@ -275,17 +299,50 @@ const TeacherAssignments = () => {
       <Dialog open={createDialog} onClose={() => setCreateDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle fontWeight={700}>➕ Create New Assignment</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-          <TextField label="Title" fullWidth value={newAssignment.title} onChange={e => setNewAssignment({...newAssignment, title: e.target.value})} />
-          <TextField label="Subject" fullWidth value={newAssignment.subject} onChange={e => setNewAssignment({...newAssignment, subject: e.target.value})} />
-          <TextField label="Class" fullWidth value={newAssignment.class} onChange={e => setNewAssignment({...newAssignment, class: e.target.value})} />
+          <TextField label="Title" fullWidth value={newAssignment.title}
+            onChange={e => setNewAssignment({...newAssignment, title: e.target.value})} />
+          <TextField label="Subject" fullWidth value={newAssignment.subject}
+            onChange={e => setNewAssignment({...newAssignment, subject: e.target.value})} />
+          <TextField label="Class" fullWidth value={newAssignment.class}
+            onChange={e => setNewAssignment({...newAssignment, class: e.target.value})} />
           <TextField label="Due Date" type="date" fullWidth InputLabelProps={{ shrink: true }}
             value={newAssignment.dueDate} onChange={e => setNewAssignment({...newAssignment, dueDate: e.target.value})} />
-          <TextField label="Max Marks" type="number" fullWidth value={newAssignment.maxMarks} onChange={e => setNewAssignment({...newAssignment, maxMarks: e.target.value})} />
-          <TextField label="Description" multiline rows={3} fullWidth value={newAssignment.description} onChange={e => setNewAssignment({...newAssignment, description: e.target.value})} />
+          <TextField label="Max Marks" type="number" fullWidth value={newAssignment.maxMarks}
+            onChange={e => setNewAssignment({...newAssignment, maxMarks: e.target.value})} />
+          <TextField label="Description" multiline rows={3} fullWidth value={newAssignment.description}
+            onChange={e => setNewAssignment({...newAssignment, description: e.target.value})} />
+
+          {/* File upload */}
+          <Box sx={{ border: '2px dashed #1a73e8', borderRadius: 2, p: 2.5, textAlign: 'center', bgcolor: '#f8f9ff' }}>
+            <UploadFileIcon sx={{ fontSize: 36, color: '#1a73e8', mb: 1 }} />
+            <Typography variant="body2" mb={1}>
+              {assignmentFile ? `✅ ${assignmentFile.name}` : 'Attach a file to this assignment (optional)'}
+            </Typography>
+            <Button variant="outlined" component="label" size="small" sx={{ borderRadius: 2 }}>
+              {assignmentFile ? 'Change File' : 'Attach File'}
+              <input type="file" hidden
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.txt"
+                onChange={e => setAssignmentFile(e.target.files[0])} />
+            </Button>
+            {assignmentFile && (
+              <Button size="small" color="error" onClick={() => setAssignmentFile(null)} sx={{ ml: 1 }}>
+                Remove
+              </Button>
+            )}
+            {assignmentUploading && (
+              <Box sx={{ mt: 2 }}>
+                <LinearProgress sx={{ borderRadius: 2 }} />
+                <Typography variant="caption" color="text.secondary">Uploading to Cloudinary...</Typography>
+              </Box>
+            )}
+          </Box>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setCreateDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => { setCreateDialog(false); setSuccess('Assignment created!'); }}>Create</Button>
+          <Button onClick={() => { setCreateDialog(false); setAssignmentFile(null); }}>Cancel</Button>
+          <Button variant="contained" onClick={handleCreate}
+            disabled={!newAssignment.title || assignmentUploading}>
+            {assignmentUploading ? 'Uploading...' : 'Create'}
+          </Button>
         </DialogActions>
       </Dialog>
 
