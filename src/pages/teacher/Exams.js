@@ -135,19 +135,19 @@ const Exams = () => {
                     </TableCell>
                     <TableCell>{e.maxMarks}</TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button size="small" variant="outlined" sx={{ borderRadius: 2 }}
-                          onClick={() => openResults(e)}>
-                          {tab === 0 ? 'Enter Results' : 'View Results'}
-                        </Button>
-                      </Box>
+                      <Button size="small" variant="outlined" sx={{ borderRadius: 2 }}
+                        onClick={() => openResults(e)}>
+                        {tab === 0 ? 'Enter Results' : 'View Results'}
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
                 {(tab === 0 ? upcomingExams : completedExams).length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                      <Typography color="text.secondary">No {tab === 0 ? 'upcoming' : 'completed'} exams</Typography>
+                      <Typography color="text.secondary">
+                        No {tab === 0 ? 'upcoming' : 'completed'} exams
+                      </Typography>
                     </TableCell>
                   </TableRow>
                 )}
@@ -231,9 +231,24 @@ const Exams = () => {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <TextField size="small" type="number" value={marks[student.id] || ''}
-                          onChange={e => setMarks(prev => ({ ...prev, [student.id]: e.target.value }))}
-                          inputProps={{ min: 0, max: selectedExam?.maxMarks }}
+                        <TextField
+                          size="small"
+                          type="number"
+                          value={marks[student.id] || ''}
+                          onChange={e => {
+                            const val = e.target.value;
+                            const max = selectedExam?.maxMarks;
+                            if (val === '') {
+                              setMarks(prev => ({ ...prev, [student.id]: '' }));
+                            } else if (parseFloat(val) > max) {
+                              setMarks(prev => ({ ...prev, [student.id]: max }));
+                            } else if (parseFloat(val) < 0) {
+                              setMarks(prev => ({ ...prev, [student.id]: 0 }));
+                            } else {
+                              setMarks(prev => ({ ...prev, [student.id]: val }));
+                            }
+                          }}
+                          inputProps={{ min: 0, max: selectedExam?.maxMarks, step: 0.5 }}
                           sx={{ width: 80 }}
                           disabled={tab === 1 && !savedResults[selectedExam?.id]}
                         />
@@ -273,21 +288,31 @@ const Exams = () => {
                 <Box>
                   <Typography variant="caption" color="text.secondary">Class Average</Typography>
                   <Typography variant="h6" fontWeight={700} color="#1a73e8">
-                    {Math.round(Object.values(marks).reduce((a, b) => a + parseFloat(b || 0), 0) / Object.values(marks).filter(Boolean).length || 0)}
-                    /{selectedExam?.maxMarks}
+                    {Math.round(
+                      Object.values(marks).reduce((a, b) => a + parseFloat(b || 0), 0) /
+                      (Object.values(marks).filter(Boolean).length || 1)
+                    )}/{selectedExam?.maxMarks}
                   </Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">Pass Rate</Typography>
                   <Typography variant="h6" fontWeight={700} color="#34a853">
-                    {Math.round(Object.values(marks).filter(m => (parseFloat(m) / selectedExam?.maxMarks) * 100 >= 33).length
-                      / Object.values(marks).filter(Boolean).length * 100 || 0)}%
+                    {Math.round(
+                      Object.values(marks).filter(m => (parseFloat(m) / selectedExam?.maxMarks) * 100 >= 33).length /
+                      (Object.values(marks).filter(Boolean).length || 1) * 100
+                    )}%
                   </Typography>
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">Highest Mark</Typography>
                   <Typography variant="h6" fontWeight={700} color="#9c27b0">
                     {Math.max(...Object.values(marks).map(m => parseFloat(m) || 0))}/{selectedExam?.maxMarks}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">Lowest Mark</Typography>
+                  <Typography variant="h6" fontWeight={700} color="#ea4335">
+                    {Math.min(...Object.values(marks).filter(Boolean).map(m => parseFloat(m) || 0))}/{selectedExam?.maxMarks}
                   </Typography>
                 </Box>
               </Box>
