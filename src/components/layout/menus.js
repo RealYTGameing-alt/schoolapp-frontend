@@ -40,6 +40,7 @@ export const studentMenu = [
   { text: 'My Progress', path: '/student/progress', icon: <BarChartIcon /> },
   { text: 'Timetable', path: '/student/timetable', icon: <EventNoteIcon /> },
   { text: 'Messages', path: '/student/messages', icon: <MessageIcon /> },
+  { text: 'Calendar', path: '/student/calendar', icon: <EventNoteIcon /> },
 ];
 
 export const parentMenu = [

@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/common/PrivateRoute';
 import { createTheme, ThemeProvider } from '@mui/material';
 import MyProfile from './pages/shared/MyProfile';
+import StudentCalendar from './pages/student/StudentCalendar';
 
 // Principal
 import PrincipalDashboard from './pages/principal/PrincipalDashboard';
@@ -97,6 +98,7 @@ function App() {
           <Route path="/student/timetable" element={<PrivateRoute role="student"><Timetable /></PrivateRoute>} />
           <Route path="/student/messages" element={<PrivateRoute role="student"><Messaging /></PrivateRoute>} />
           <Route path="/student/profile" element={<PrivateRoute role="student"><MyProfile /></PrivateRoute>} />
+          <Route path="/student/calendar" element={<PrivateRoute role="student"><StudentCalendar /></PrivateRoute>} />
 
           {/* Parent */}
           <Route path="/parent" element={<PrivateRoute role="parent"><ParentDashboard /></PrivateRoute>} />

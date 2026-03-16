@@ -6,7 +6,7 @@ import {
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import Layout from '../../components/layout/Layout';
-import { parentMenu } from '../../components/layout/menus';
+import { studentMenu } from '../../components/layout/menus';
 import api from '../../services/api';
 
 const eventTypeColors = {
@@ -18,15 +18,15 @@ const defaultEvents = [
   { id: 1, title: 'Republic Day', event_type: 'holiday', start_date: '2026-01-26', is_holiday: true, description: 'National Holiday' },
   { id: 2, title: 'Mid-term Exams', event_type: 'exam', start_date: '2026-04-01', end_date: '2026-04-08', description: 'Mid-term examinations' },
   { id: 3, title: 'Annual Sports Day', event_type: 'sports', start_date: '2026-03-15', description: 'Annual sports competition' },
-  { id: 4, title: 'Parent-Teacher Meeting', event_type: 'meeting', start_date: '2026-03-20', description: 'PTM for Classes 9 and 10' },
-  { id: 5, title: 'Holi', event_type: 'holiday', start_date: '2026-03-14', is_holiday: true, description: 'National Holiday' },
+  { id: 4, title: 'Holi', event_type: 'holiday', start_date: '2026-03-14', is_holiday: true, description: 'National Holiday' },
+  { id: 5, title: 'Science Exhibition', event_type: 'event', start_date: '2026-04-15', description: 'Annual science exhibition' },
 ];
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'];
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const ParentCalendar = () => {
+const StudentCalendar = () => {
   const [events, setEvents] = useState(defaultEvents);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
@@ -63,7 +63,7 @@ const ParentCalendar = () => {
     .slice(0, 6);
 
   return (
-    <Layout menuItems={parentMenu}>
+    <Layout menuItems={studentMenu}>
       <Typography variant="h5" fontWeight={700} mb={3}>📅 School Calendar</Typography>
 
       <Grid container spacing={3}>
@@ -152,6 +152,7 @@ const ParentCalendar = () => {
                       <Chip label={e.event_type} size="small"
                         sx={{ bgcolor: (eventTypeColors[e.event_type] || '#1a73e8') + '20',
                               color: eventTypeColors[e.event_type] || '#1a73e8', fontWeight: 600, fontSize: 10 }} />
+                      {e.is_holiday && <Chip label="Holiday" size="small" color="error" sx={{ ml: 0.5 }} />}
                     </Box>
                   </Box>
                 ))}
@@ -192,4 +193,4 @@ const ParentCalendar = () => {
   );
 };
 
-export default ParentCalendar;
+export default StudentCalendar;
