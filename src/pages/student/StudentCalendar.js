@@ -70,24 +70,47 @@ const StudentCalendar = () => {
         <Grid item xs={12} md={8}>
           <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <CardContent>
+              {/* Month navigation */}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <IconButton onClick={() => setCurrentDate(new Date(year, month - 1, 1))}><ChevronLeftIcon /></IconButton>
                 <Typography variant="h6" fontWeight={700}>{MONTHS[month]} {year}</Typography>
                 <IconButton onClick={() => setCurrentDate(new Date(year, month + 1, 1))}><ChevronRightIcon /></IconButton>
               </Box>
 
-              <Grid container sx={{ mb: 1 }}>
+              {/* ── Fixed day headers ── */}
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                mb: 1,
+                borderBottom: '1px solid #f0f0f0',
+                pb: 1,
+              }}>
                 {DAYS.map(d => (
-                  <Grid item xs key={d} sx={{ textAlign: 'center' }}>
-                    <Typography variant="caption" fontWeight={700} color="text.secondary">{d}</Typography>
-                  </Grid>
+                  <Box key={d} sx={{ textAlign: 'center', py: 0.5 }}>
+                    <Typography
+                      variant="caption"
+                      fontWeight={700}
+                      color="text.secondary"
+                      sx={{ fontSize: { xs: 11, md: 13 } }}
+                    >
+                      {d}
+                    </Typography>
+                  </Box>
                 ))}
-              </Grid>
+              </Box>
 
-              <Grid container>
+              {/* ── Fixed calendar grid ── */}
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: 0.5,
+              }}>
+                {/* Empty cells before first day */}
                 {Array.from({ length: firstDay }).map((_, i) => (
-                  <Grid item xs key={`empty-${i}`} sx={{ aspectRatio: '1', p: 0.3 }} />
+                  <Box key={`empty-${i}`} />
                 ))}
+
+                {/* Day cells */}
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                   const day = i + 1;
                   const dayEvts = getEventsForDay(day);
@@ -96,34 +119,44 @@ const StudentCalendar = () => {
                   const todayFlag = isToday(day);
 
                   return (
-                    <Grid item xs key={day} sx={{ aspectRatio: '1', p: 0.3 }}>
-                      <Box onClick={() => { setSelectedDay(day); setDayEvents(dayEvts); setDayDialog(true); }}
-                        sx={{
-                          height: '100%', minHeight: { xs: 36, md: 52 },
-                          borderRadius: 2, cursor: 'pointer', p: 0.5,
-                          bgcolor: todayFlag ? '#1a73e8' : isHoliday ? '#fce8e6' : hasEvents ? '#f0f7ff' : 'transparent',
-                          border: todayFlag ? 'none' : hasEvents ? '1px solid #e0e0e0' : '1px solid transparent',
-                          '&:hover': { bgcolor: todayFlag ? '#1557b0' : '#f0f0f0' },
-                          display: 'flex', flexDirection: 'column', alignItems: 'center',
-                        }}>
-                        <Typography variant="caption" fontWeight={todayFlag ? 700 : 400}
-                          color={todayFlag ? 'white' : isHoliday ? '#ea4335' : 'text.primary'}
-                          sx={{ fontSize: { xs: 11, md: 13 } }}>
-                          {day}
-                        </Typography>
-                        {hasEvents && !todayFlag && (
-                          <Box sx={{ display: 'flex', gap: 0.3, flexWrap: 'wrap', justifyContent: 'center', mt: 0.3 }}>
-                            {dayEvts.slice(0, 2).map((e, idx) => (
-                              <Box key={idx} sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: eventTypeColors[e.event_type] || '#1a73e8' }} />
-                            ))}
-                          </Box>
-                        )}
-                      </Box>
-                    </Grid>
+                    <Box
+                      key={day}
+                      onClick={() => { setSelectedDay(day); setDayEvents(dayEvts); setDayDialog(true); }}
+                      sx={{
+                        minHeight: { xs: 40, md: 52 },
+                        borderRadius: 2,
+                        cursor: 'pointer',
+                        p: 0.5,
+                        bgcolor: todayFlag ? '#1a73e8' : isHoliday ? '#fce8e6' : hasEvents ? '#f0f7ff' : 'transparent',
+                        border: todayFlag ? 'none' : hasEvents ? '1px solid #e0e0e0' : '1px solid transparent',
+                        '&:hover': { bgcolor: todayFlag ? '#1557b0' : '#f0f0f0' },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        fontWeight={todayFlag ? 700 : 400}
+                        color={todayFlag ? 'white' : isHoliday ? '#ea4335' : 'text.primary'}
+                        sx={{ fontSize: { xs: 11, md: 13 }, lineHeight: 1 }}
+                      >
+                        {day}
+                      </Typography>
+                      {hasEvents && !todayFlag && (
+                        <Box sx={{ display: 'flex', gap: 0.3, flexWrap: 'wrap', justifyContent: 'center', mt: 0.4 }}>
+                          {dayEvts.slice(0, 2).map((e, idx) => (
+                            <Box key={idx} sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: eventTypeColors[e.event_type] || '#1a73e8' }} />
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
                   );
                 })}
-              </Grid>
+              </Box>
 
+              {/* Legend */}
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2, pt: 2, borderTop: '1px solid #f0f0f0' }}>
                 {Object.entries(eventTypeColors).map(([type, color]) => (
                   <Box key={type} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -136,6 +169,7 @@ const StudentCalendar = () => {
           </Card>
         </Grid>
 
+        {/* Upcoming Events */}
         <Grid item xs={12} md={4}>
           <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <CardContent>
@@ -162,6 +196,7 @@ const StudentCalendar = () => {
         </Grid>
       </Grid>
 
+      {/* Day Dialog */}
       <Dialog open={dayDialog} onClose={() => setDayDialog(false)} maxWidth="xs" fullWidth>
         <DialogTitle fontWeight={700}>📅 {selectedDay} {MONTHS[month]} {year}</DialogTitle>
         <DialogContent>
