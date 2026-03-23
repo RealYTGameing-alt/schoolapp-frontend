@@ -16,6 +16,39 @@ import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from 'react-router-dom';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// EmailJS configuration
+// 1. Sign up free at https://www.emailjs.com
+// 2. Create a service (Gmail) → copy Service ID below
+// 3. Create an email template → copy Template ID below
+//    Template variables to use: {{from_name}}, {{school}}, {{phone}}, {{email}}, {{reply_to}}
+// 4. Copy your Public Key (Account → API Keys) below
+// ─────────────────────────────────────────────────────────────────────────────
+const EMAILJS_SERVICE_ID  = 'service_yapq6pb';   // e.g. 'service_abc123'
+const EMAILJS_TEMPLATE_ID = 'template_6ulp0yh';  // e.g. 'template_xyz456'
+const EMAILJS_PUBLIC_KEY  = 'l56iS0uwlYQfj7e7f';   // e.g. 'abcDEFghiJKL'
+
+const sendDemoNotification = async (formData) => {
+  // Lazy-load EmailJS so it doesn't block initial page render
+  const emailjs = await import('@emailjs/browser');
+
+  return emailjs.send(
+    EMAILJS_SERVICE_ID,
+    EMAILJS_TEMPLATE_ID,
+    {
+      to_email:  'darshnitinshetty@gmail.com',
+      from_name: formData.name,
+      school:    formData.school,
+      phone:     formData.phone,
+      email:     formData.email || 'Not provided',
+      reply_to:  formData.email || 'noreply@edumanagepro.com',
+    },
+    EMAILJS_PUBLIC_KEY
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const features = [
   { icon: <SchoolIcon sx={{ fontSize: 32 }} />, title: 'Student Management', desc: 'Manage admissions, attendance, grades and progress all in one place.', color: '#1a73e8' },
   { icon: <PeopleIcon sx={{ fontSize: 32 }} />, title: 'Staff & HR', desc: 'Track teacher attendance, lesson plans, leave applications and payroll.', color: '#34a853' },
@@ -77,12 +110,24 @@ const roles = [
 const Landing = () => {
   const navigate = useNavigate();
   const [demoForm, setDemoForm] = useState({ name: '', school: '', phone: '', email: '' });
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted]   = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleDemoSubmit = () => {
+  const handleDemoSubmit = async () => {
     if (!demoForm.name || !demoForm.school || !demoForm.phone) return;
-    setSubmitted(true);
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      await sendDemoNotification(demoForm);
+      setSubmitted(true);
+    } catch (err) {
+      console.error('EmailJS error:', err);
+      setSubmitError('Something went wrong. Please WhatsApp us directly at +91 94237 39041.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const scrollTo = (id) => {
@@ -379,11 +424,18 @@ const Landing = () => {
                         onChange={e => setDemoForm({...demoForm, phone: e.target.value})} />
                       <TextField label="Email Address" fullWidth size="small" value={demoForm.email}
                         onChange={e => setDemoForm({...demoForm, email: e.target.value})} />
+
+                      {submitError && (
+                        <Typography variant="body2" color="error" textAlign="center">
+                          {submitError}
+                        </Typography>
+                      )}
+
                       <Button fullWidth variant="contained" size="large"
                         onClick={handleDemoSubmit}
-                        disabled={!demoForm.name || !demoForm.school || !demoForm.phone}
+                        disabled={!demoForm.name || !demoForm.school || !demoForm.phone || submitting}
                         sx={{ borderRadius: 2, py: 1.5, fontWeight: 700, bgcolor: '#1a73e8', fontSize: 15 }}>
-                        🎯 Get Free 3-Month Trial
+                        {submitting ? '⏳ Sending...' : '🎯 Get Free 3-Month Trial'}
                       </Button>
                       <Typography variant="caption" color="text.secondary" textAlign="center">
                         We'll WhatsApp you within 24 hours
@@ -423,8 +475,9 @@ const Landing = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <Typography variant="subtitle2" fontWeight={700} mb={1.5}>Contact Us</Typography>
-            <Typography variant="body2" sx={{ opacity: 0.6, mb: 0.5 }}>📧 support@edumanagepro.com</Typography>
-            <Typography variant="body2" sx={{ opacity: 0.6, mb: 0.5 }}>📱 WhatsApp: +91 98765 43210</Typography>
+            {/* ── Updated contact details ── */}
+            <Typography variant="body2" sx={{ opacity: 0.6, mb: 0.5 }}>📧 darshnitinshetty@gmail.com</Typography>
+            <Typography variant="body2" sx={{ opacity: 0.6, mb: 0.5 }}>📱 WhatsApp: +91 94237 39041</Typography>
             <Typography variant="body2" sx={{ opacity: 0.6 }}>📍 Nagpur, Maharashtra, India</Typography>
           </Grid>
         </Grid>
