@@ -17,45 +17,65 @@ const fees = [
 
 const ParentFees = () => {
 
-  const handleDownloadReceipt = (fee) => {
-    const doc = new jsPDF();
+const handleDownloadReceipt = (fee) => {
+  const doc = new jsPDF();
 
-    // Title
-    doc.setFontSize(18);
-    doc.text("SCHOOL NAME", 105, 20, null, null, "center");
+  // ===== LOGO (fake circle logo) =====
+  doc.setFillColor(26, 115, 232); // blue
+  doc.circle(20, 20, 8, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(10);
+  doc.text("SCH", 20, 22, null, null, "center");
 
-    doc.setFontSize(14);
-    doc.text("FEE RECEIPT", 105, 30, null, null, "center");
+  // Reset text color
+  doc.setTextColor(0, 0, 0);
 
-    // Line
-    doc.line(20, 35, 190, 35);
+  // ===== SCHOOL NAME =====
+  doc.setFontSize(16);
+  doc.text("Green Valley School", 105, 20, null, null, "center");
 
-    // Receipt details
-    doc.setFontSize(12);
+  doc.setFontSize(12);
+  doc.text("Fee Receipt", 105, 28, null, null, "center");
 
-    doc.text(`Receipt No: RCPT-${fee.id}`, 20, 50);
-    doc.text(`Date: ${fee.paidOn}`, 150, 50);
+  // Line
+  doc.line(20, 32, 190, 32);
 
-    doc.text(`Student Name: Suresh Sharma`, 20, 65);
-    doc.text(`Term: ${fee.term}`, 20, 75);
+  // ===== RECEIPT INFO =====
+  doc.setFontSize(11);
 
-    doc.text(`Amount Paid: ${fee.amount}`, 20, 90);
-    doc.text(`Payment Status: ${fee.status}`, 20, 100);
+  doc.text(`Receipt No: RCPT-${fee.id}`, 20, 45);
+  doc.text(`Date: ${fee.paidOn}`, 140, 45);
 
-    // Box around details (just for structure)
-    doc.rect(15, 40, 180, 70);
+  // ===== STUDENT INFO =====
+  doc.text(`Student Name: Suresh Sharma`, 20, 60);
+  doc.text(`Term: ${fee.term}`, 20, 70);
 
-    // Footer
-    doc.text("This is a system-generated receipt.", 20, 125);
-    doc.text("Thank you for your payment.", 20, 135);
+  // ===== PAYMENT BOX =====
+  doc.rect(20, 80, 170, 40);
 
-    // Signature placeholder
-    doc.text("Authorized Signature", 140, 160);
-    doc.line(140, 155, 190, 155);
+  doc.setFontSize(12);
+  doc.text("Payment Details", 25, 90);
 
-    // Save PDF
-    doc.save(`${fee.term.replace(/\s/g, "_")}_Receipt.pdf`);
-  };
+  doc.setFontSize(11);
+
+  // 🔥 FIXED AMOUNT (no ₹ glitch)
+  const cleanAmount = fee.amount.replace('₹', 'Rs.');
+
+  doc.text(`Amount Paid: ${cleanAmount}`, 25, 105);
+  doc.text(`Status: ${fee.status}`, 25, 115);
+
+  // ===== FOOTER =====
+  doc.setFontSize(10);
+  doc.text("This is a system-generated receipt.", 20, 140);
+  doc.text("Thank you for your payment.", 20, 148);
+
+  // ===== PRINCIPAL SIGNATURE =====
+  doc.text("Principal Signature", 140, 170);
+  doc.line(140, 165, 190, 165);
+
+  // Save
+  doc.save(`${fee.term.replace(/\s/g, "_")}_Receipt.pdf`);
+};
 
   return (
     <Layout menuItems={parentMenu}>
