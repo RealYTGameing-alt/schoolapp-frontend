@@ -141,4 +141,3 @@ Thank you for your payment.
 };
 
 export default ParentFees;
-window.URL.revokeObjectURL(url);
