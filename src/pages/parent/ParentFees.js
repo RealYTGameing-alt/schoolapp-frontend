@@ -1,5 +1,8 @@
 import React from 'react';
-import { Typography, Box, Card, CardContent, Chip, Button, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import {
+  Typography, Box, Card, CardContent, Chip, Button,
+  Table, TableBody, TableCell, TableHead, TableRow
+} from '@mui/material';
 import Layout from '../../components/layout/Layout';
 import { parentMenu } from '../../components/layout/menus';
 
@@ -12,26 +15,65 @@ const fees = [
 ];
 
 const ParentFees = () => {
+
+  // 🔹 Generate and download dummy receipt
+  const handleDownloadReceipt = (fee) => {
+    const content = `
+      SCHOOL FEE RECEIPT
+      ----------------------------
+      Student: Suresh Sharma
+      Term: ${fee.term}
+      Amount Paid: ${fee.amount}
+      Paid On: ${fee.paidOn}
+      Status: ${fee.status}
+      ----------------------------
+      Thank you for your payment.
+    `;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fee.term.replace(/\s/g, '_')}_Receipt.txt`;
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <Layout menuItems={parentMenu}>
-      <Typography variant="h5" fontWeight={700} mb={3}>💰 Fee Payments</Typography>
+      <Typography variant="h5" fontWeight={700} mb={3}>
+        💰 Fee Payments
+      </Typography>
 
+      {/* Summary Cards */}
       <Box sx={{ display: 'flex', gap: 3, mb: 3, flexWrap: 'wrap' }}>
-        <Card sx={{ borderRadius: 3, flex: 1, minWidth: 150, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderLeft: '4px solid #34a853' }}>
+        <Card sx={{ borderRadius: 3, flex: 1, minWidth: 150, borderLeft: '4px solid #34a853' }}>
           <CardContent>
-            <Typography variant="h5" fontWeight={700} color="#34a853">₹48,000</Typography>
-            <Typography variant="caption" color="text.secondary">Total Paid</Typography>
+            <Typography variant="h5" fontWeight={700} color="#34a853">
+              ₹48,000
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Total Paid
+            </Typography>
           </CardContent>
         </Card>
-        <Card sx={{ borderRadius: 3, flex: 1, minWidth: 150, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderLeft: '4px solid #fbbc04' }}>
+
+        <Card sx={{ borderRadius: 3, flex: 1, minWidth: 150, borderLeft: '4px solid #fbbc04' }}>
           <CardContent>
-            <Typography variant="h5" fontWeight={700} color="#fbbc04">₹2,500</Typography>
-            <Typography variant="caption" color="text.secondary">Pending</Typography>
+            <Typography variant="h5" fontWeight={700} color="#fbbc04">
+              ₹2,500
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Pending
+            </Typography>
           </CardContent>
         </Card>
       </Box>
 
-      <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+      {/* Table */}
+      <Card sx={{ borderRadius: 3 }}>
         <CardContent sx={{ p: 0 }}>
           <Table>
             <TableHead>
@@ -44,29 +86,52 @@ const ParentFees = () => {
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {fees.map((f) => (
                 <TableRow key={f.id} hover>
-                  <TableCell fontWeight={600}>{f.term}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{f.term}</TableCell>
                   <TableCell>{f.amount}</TableCell>
                   <TableCell>{f.dueDate}</TableCell>
+
                   <TableCell>
-                    <Chip label={f.status} size="small" color={f.status === 'Paid' ? 'success' : 'warning'} />
+                    <Chip
+                      label={f.status}
+                      size="small"
+                      color={f.status === 'Paid' ? 'success' : 'warning'}
+                    />
                   </TableCell>
+
                   <TableCell>{f.paidOn}</TableCell>
+
                   <TableCell>
                     {f.status === 'Paid' ? (
-                      <Button size="small" variant="outlined" sx={{ borderRadius: 2 }}>Receipt</Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        sx={{ borderRadius: 2 }}
+                        onClick={() => handleDownloadReceipt(f)}
+                      >
+                        Receipt
+                      </Button>
                     ) : (
-                      <Button size="small" variant="contained" sx={{ borderRadius: 2 }}>Pay Now</Button>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        sx={{ borderRadius: 2 }}
+                      >
+                        Pay Now
+                      </Button>
                     )}
                   </TableCell>
+
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
     </Layout>
   );
 };
