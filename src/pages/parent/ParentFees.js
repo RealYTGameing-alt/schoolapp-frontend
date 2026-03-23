@@ -5,6 +5,7 @@ import {
 } from '@mui/material';
 import Layout from '../../components/layout/Layout';
 import { parentMenu } from '../../components/layout/menus';
+import { jsPDF } from "jspdf";
 
 const fees = [
   { id: 1, term: 'Term 1 (Apr-Jun)', amount: '₹12,000', dueDate: '2025-04-10', status: 'Paid', paidOn: '2025-04-08' },
@@ -16,34 +17,45 @@ const fees = [
 
 const ParentFees = () => {
 
-const handleDownloadReceipt = (fee) => {
-  const content = `
-SCHOOL FEE RECEIPT
-----------------------------
-Student: Suresh Sharma
-Term: ${fee.term}
-Amount Paid: ${fee.amount}
-Paid On: ${fee.paidOn}
-Status: ${fee.status}
-----------------------------
-Thank you for your payment.
-`;
+  const handleDownloadReceipt = (fee) => {
+    const doc = new jsPDF();
 
-  const blob = new Blob([content], { type: 'text/plain' });
-  const url = window.URL.createObjectURL(blob);
+    // Title
+    doc.setFontSize(18);
+    doc.text("SCHOOL NAME", 105, 20, null, null, "center");
 
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${fee.term.replace(/\s/g, '_')}_Receipt.txt`;
+    doc.setFontSize(14);
+    doc.text("FEE RECEIPT", 105, 30, null, null, "center");
 
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+    // Line
+    doc.line(20, 35, 190, 35);
 
-  setTimeout(() => {
-    window.URL.revokeObjectURL(url);
-  }, 1000);
-};
+    // Receipt details
+    doc.setFontSize(12);
+
+    doc.text(`Receipt No: RCPT-${fee.id}`, 20, 50);
+    doc.text(`Date: ${fee.paidOn}`, 150, 50);
+
+    doc.text(`Student Name: Suresh Sharma`, 20, 65);
+    doc.text(`Term: ${fee.term}`, 20, 75);
+
+    doc.text(`Amount Paid: ${fee.amount}`, 20, 90);
+    doc.text(`Payment Status: ${fee.status}`, 20, 100);
+
+    // Box around details (just for structure)
+    doc.rect(15, 40, 180, 70);
+
+    // Footer
+    doc.text("This is a system-generated receipt.", 20, 125);
+    doc.text("Thank you for your payment.", 20, 135);
+
+    // Signature placeholder
+    doc.text("Authorized Signature", 140, 160);
+    doc.line(140, 155, 190, 155);
+
+    // Save PDF
+    doc.save(`${fee.term.replace(/\s/g, "_")}_Receipt.pdf`);
+  };
 
   return (
     <Layout menuItems={parentMenu}>
