@@ -10,21 +10,25 @@ import { parentMenu } from '../../components/layout/menus';
 import api from '../../services/api';
 
 const eventTypeColors = {
-  holiday: '#ea4335', exam: '#9c27b0',
-  event: '#1a73e8', meeting: '#fbbc04', sports: '#34a853',
+  holiday: '#ea4335',
+  exam: '#9c27b0',
+  event: '#1a73e8',
+  meeting: '#fbbc04',
+  sports: '#34a853',
 };
 
 const defaultEvents = [
-  { id: 1, title: 'Republic Day', event_type: 'holiday', start_date: '2026-01-26', is_holiday: true, description: 'National Holiday' },
-  { id: 2, title: 'Mid-term Exams', event_type: 'exam', start_date: '2026-04-01', end_date: '2026-04-08', description: 'Mid-term examinations' },
-  { id: 3, title: 'Annual Sports Day', event_type: 'sports', start_date: '2026-03-15', description: 'Annual sports competition' },
-  { id: 4, title: 'Parent-Teacher Meeting', event_type: 'meeting', start_date: '2026-03-20', description: 'PTM for Classes 9 and 10' },
-  { id: 5, title: 'Holi', event_type: 'holiday', start_date: '2026-03-14', is_holiday: true, description: 'National Holiday' },
+  { id: 1, title: 'Republic Day', event_type: 'holiday', start_date: '2026-01-26', is_holiday: true },
+  { id: 2, title: 'Mid-term Exams', event_type: 'exam', start_date: '2026-04-01', end_date: '2026-04-08' },
+  { id: 3, title: 'Annual Sports Day', event_type: 'sports', start_date: '2026-03-15' },
+  { id: 4, title: 'Parent-Teacher Meeting', event_type: 'meeting', start_date: '2026-03-20' },
+  { id: 5, title: 'Holi', event_type: 'holiday', start_date: '2026-03-14', is_holiday: true },
 ];
 
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS = ['January','February','March','April','May','June',
+'July','August','September','October','November','December'];
+
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 const ParentCalendar = () => {
   const [events, setEvents] = useState(defaultEvents);
@@ -45,7 +49,7 @@ const ParentCalendar = () => {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const getEventsForDay = (day) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     return events.filter(e => {
       const start = e.start_date?.split('T')[0];
       const end = e.end_date?.split('T')[0] || start;
@@ -55,40 +59,61 @@ const ParentCalendar = () => {
 
   const today = new Date();
   const isToday = (day) =>
-    day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    day === today.getDate() &&
+    month === today.getMonth() &&
+    year === today.getFullYear();
 
   const upcomingEvents = [...events]
     .filter(e => new Date(e.start_date) >= new Date())
-    .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
-    .slice(0, 6);
+    .sort((a,b) => new Date(a.start_date) - new Date(b.start_date))
+    .slice(0,6);
 
   return (
     <Layout menuItems={parentMenu}>
-      <Typography variant="h5" fontWeight={700} mb={3}>📅 School Calendar</Typography>
+      <Typography variant="h5" fontWeight={700} mb={3}>
+        📅 School Calendar
+      </Typography>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <Card sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <IconButton onClick={() => setCurrentDate(new Date(year, month - 1, 1))}><ChevronLeftIcon /></IconButton>
-                <Typography variant="h6" fontWeight={700}>{MONTHS[month]} {year}</Typography>
-                <IconButton onClick={() => setCurrentDate(new Date(year, month + 1, 1))}><ChevronRightIcon /></IconButton>
+
+              {/* Header */}
+              <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center', mb:3 }}>
+                <IconButton onClick={() => setCurrentDate(new Date(year, month - 1, 1))}>
+                  <ChevronLeftIcon />
+                </IconButton>
+
+                <Typography variant="h6" fontWeight={700}>
+                  {MONTHS[month]} {year}
+                </Typography>
+
+                <IconButton onClick={() => setCurrentDate(new Date(year, month + 1, 1))}>
+                  <ChevronRightIcon />
+                </IconButton>
               </Box>
 
-              <Grid container sx={{ mb: 1 }}>
+              {/* DAYS ROW (FIXED) */}
+              <Box sx={{ display:'flex', mb:1 }}>
                 {DAYS.map(d => (
-                  <Grid item xs key={d} sx={{ textAlign: 'center' }}>
-                    <Typography variant="caption" fontWeight={700} color="text.secondary">{d}</Typography>
-                  </Grid>
+                  <Box key={d} sx={{ flex:1, textAlign:'center', py:0.5 }}>
+                    <Typography variant="caption" fontWeight={700} color="text.secondary">
+                      {d}
+                    </Typography>
+                  </Box>
                 ))}
-              </Grid>
+              </Box>
 
-              <Grid container>
-                {Array.from({ length: firstDay }).map((_, i) => (
-                  <Grid item xs key={`empty-${i}`} sx={{ aspectRatio: '1', p: 0.3 }} />
+              {/* CALENDAR GRID (FIXED) */}
+              <Box sx={{ display:'flex', flexWrap:'wrap' }}>
+                {/* Empty slots */}
+                {Array.from({ length:firstDay }).map((_,i) => (
+                  <Box key={`empty-${i}`} sx={{ width:'14.28%', aspectRatio:'1' }} />
                 ))}
-                {Array.from({ length: daysInMonth }).map((_, i) => {
+
+                {/* Days */}
+                {Array.from({ length:daysInMonth }).map((_,i) => {
                   const day = i + 1;
                   const dayEvts = getEventsForDay(day);
                   const hasEvents = dayEvts.length > 0;
@@ -96,98 +121,110 @@ const ParentCalendar = () => {
                   const todayFlag = isToday(day);
 
                   return (
-                    <Grid item xs key={day} sx={{ aspectRatio: '1', p: 0.3 }}>
-                      <Box onClick={() => { setSelectedDay(day); setDayEvents(dayEvts); setDayDialog(true); }}
+                    <Box
+                      key={day}
+                      sx={{
+                        width:'14.28%',
+                        aspectRatio:'1',
+                        p:0.3
+                      }}
+                    >
+                      <Box
+                        onClick={() => {
+                          setSelectedDay(day);
+                          setDayEvents(dayEvts);
+                          setDayDialog(true);
+                        }}
                         sx={{
-                          height: '100%', minHeight: { xs: 36, md: 52 },
-                          borderRadius: 2, cursor: 'pointer', p: 0.5,
-                          bgcolor: todayFlag ? '#1a73e8' : isHoliday ? '#fce8e6' : hasEvents ? '#f0f7ff' : 'transparent',
-                          border: todayFlag ? 'none' : hasEvents ? '1px solid #e0e0e0' : '1px solid transparent',
-                          '&:hover': { bgcolor: todayFlag ? '#1557b0' : '#f0f0f0' },
-                          display: 'flex', flexDirection: 'column', alignItems: 'center',
-                        }}>
-                        <Typography variant="caption" fontWeight={todayFlag ? 700 : 400}
+                          height:'100%',
+                          borderRadius:2,
+                          cursor:'pointer',
+                          p:0.5,
+                          bgcolor: todayFlag ? '#1a73e8'
+                            : isHoliday ? '#fce8e6'
+                            : hasEvents ? '#f0f7ff'
+                            : 'transparent',
+                          display:'flex',
+                          flexDirection:'column',
+                          alignItems:'center',
+                          '&:hover': { bgcolor:'#f0f0f0' }
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          fontWeight={todayFlag ? 700 : 400}
                           color={todayFlag ? 'white' : isHoliday ? '#ea4335' : 'text.primary'}
-                          sx={{ fontSize: { xs: 11, md: 13 } }}>
+                        >
                           {day}
                         </Typography>
+
                         {hasEvents && !todayFlag && (
-                          <Box sx={{ display: 'flex', gap: 0.3, flexWrap: 'wrap', justifyContent: 'center', mt: 0.3 }}>
-                            {dayEvts.slice(0, 2).map((e, idx) => (
-                              <Box key={idx} sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: eventTypeColors[e.event_type] || '#1a73e8' }} />
+                          <Box sx={{ display:'flex', gap:0.3, mt:0.3 }}>
+                            {dayEvts.slice(0,2).map((e,idx) => (
+                              <Box key={idx}
+                                sx={{
+                                  width:6,
+                                  height:6,
+                                  borderRadius:'50%',
+                                  bgcolor:eventTypeColors[e.event_type]
+                                }}
+                              />
                             ))}
                           </Box>
                         )}
                       </Box>
-                    </Grid>
+                    </Box>
                   );
                 })}
-              </Grid>
-
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2, pt: 2, borderTop: '1px solid #f0f0f0' }}>
-                {Object.entries(eventTypeColors).map(([type, color]) => (
-                  <Box key={type} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color }} />
-                    <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'capitalize' }}>{type}</Typography>
-                  </Box>
-                ))}
               </Box>
+
             </CardContent>
           </Card>
         </Grid>
 
+        {/* UPCOMING EVENTS */}
         <Grid item xs={12} md={4}>
-          <Card sx={{ borderRadius: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <Card sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Typography variant="h6" fontWeight={700} mb={2}>📋 Upcoming Events</Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                {upcomingEvents.map((e) => (
-                  <Box key={e.id} sx={{ p: 1.5, borderRadius: 2, bgcolor: '#f8f9fa',
-                    borderLeft: `4px solid ${eventTypeColors[e.event_type] || '#1a73e8'}` }}>
-                    <Typography variant="body2" fontWeight={700}>{e.title}</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {new Date(e.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </Typography>
-                    <Box mt={0.5}>
-                      <Chip label={e.event_type} size="small"
-                        sx={{ bgcolor: (eventTypeColors[e.event_type] || '#1a73e8') + '20',
-                              color: eventTypeColors[e.event_type] || '#1a73e8', fontWeight: 600, fontSize: 10 }} />
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
+              <Typography variant="h6" fontWeight={700} mb={2}>
+                📋 Upcoming Events
+              </Typography>
+
+              {upcomingEvents.map(e => (
+                <Box key={e.id} sx={{ mb:2, p:1.5, borderLeft:`4px solid ${eventTypeColors[e.event_type]}` }}>
+                  <Typography fontWeight={700}>{e.title}</Typography>
+                  <Typography variant="caption">
+                    {new Date(e.start_date).toDateString()}
+                  </Typography>
+                </Box>
+              ))}
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      <Dialog open={dayDialog} onClose={() => setDayDialog(false)} maxWidth="xs" fullWidth>
-        <DialogTitle fontWeight={700}>📅 {selectedDay} {MONTHS[month]} {year}</DialogTitle>
+      {/* DIALOG */}
+      <Dialog open={dayDialog} onClose={() => setDayDialog(false)}>
+        <DialogTitle>
+          {selectedDay} {MONTHS[month]} {year}
+        </DialogTitle>
+
         <DialogContent>
-          {dayEvents.length === 0 ? (
-            <Typography color="text.secondary" textAlign="center" py={2}>No events on this day</Typography>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1 }}>
-              {dayEvents.map((e) => (
-                <Box key={e.id} sx={{ p: 2, borderRadius: 2, bgcolor: '#f8f9fa',
-                  borderLeft: `4px solid ${eventTypeColors[e.event_type] || '#1a73e8'}` }}>
-                  <Typography variant="body2" fontWeight={700}>{e.title}</Typography>
-                  {e.description && <Typography variant="caption" color="text.secondary">{e.description}</Typography>}
-                  <Box mt={0.5}>
-                    <Chip label={e.event_type} size="small"
-                      sx={{ bgcolor: (eventTypeColors[e.event_type] || '#1a73e8') + '20',
-                            color: eventTypeColors[e.event_type] || '#1a73e8' }} />
-                    {e.is_holiday && <Chip label="Holiday" size="small" color="error" sx={{ ml: 0.5 }} />}
-                  </Box>
+          {dayEvents.length === 0
+            ? <Typography>No events</Typography>
+            : dayEvents.map(e => (
+                <Box key={e.id} sx={{ mb:1 }}>
+                  <Typography fontWeight={700}>{e.title}</Typography>
                 </Box>
-              ))}
-            </Box>
-          )}
+              ))
+          }
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
+
+        <DialogActions>
           <Button onClick={() => setDayDialog(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+
     </Layout>
   );
 };
