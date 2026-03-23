@@ -16,30 +16,34 @@ const fees = [
 
 const ParentFees = () => {
 
-  // 🔹 Generate and download dummy receipt
-  const handleDownloadReceipt = (fee) => {
-    const content = `
-      SCHOOL FEE RECEIPT
-      ----------------------------
-      Student: Suresh Sharma
-      Term: ${fee.term}
-      Amount Paid: ${fee.amount}
-      Paid On: ${fee.paidOn}
-      Status: ${fee.status}
-      ----------------------------
-      Thank you for your payment.
-    `;
+const handleDownloadReceipt = (fee) => {
+  const content = `
+SCHOOL FEE RECEIPT
+----------------------------
+Student: Suresh Sharma
+Term: ${fee.term}
+Amount Paid: ${fee.amount}
+Paid On: ${fee.paidOn}
+Status: ${fee.status}
+----------------------------
+Thank you for your payment.
+`;
 
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${fee.term.replace(/\s/g, '_')}_Receipt.txt`;
-    a.click();
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${fee.term.replace(/\s/g, '_')}_Receipt.txt`;
 
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  setTimeout(() => {
     window.URL.revokeObjectURL(url);
-  };
+  }, 1000);
+};
 
   return (
     <Layout menuItems={parentMenu}>
@@ -137,3 +141,4 @@ const ParentFees = () => {
 };
 
 export default ParentFees;
+window.URL.revokeObjectURL(url);
