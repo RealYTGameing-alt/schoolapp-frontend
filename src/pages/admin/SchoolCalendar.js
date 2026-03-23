@@ -87,7 +87,6 @@ const SchoolCalendar = () => {
       });
       setEvents(prev => [...prev, res.data.event]);
     } catch (err) {
-      // Add locally
       setEvents(prev => [...prev, {
         id: Date.now(),
         title: newEvent.title,
@@ -116,7 +115,6 @@ const SchoolCalendar = () => {
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
-  // Upcoming events sorted
   const upcomingEvents = [...events]
     .filter(e => new Date(e.start_date) >= new Date())
     .sort((a, b) => new Date(a.start_date) - new Date(b.start_date))
@@ -149,20 +147,37 @@ const SchoolCalendar = () => {
                 <IconButton onClick={nextMonth}><ChevronRightIcon /></IconButton>
               </Box>
 
-              {/* Day headers */}
-              <Grid container sx={{ mb: 1 }}>
+              {/* ── Fixed day headers ── */}
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                mb: 1,
+                borderBottom: '1px solid #f0f0f0',
+                pb: 1,
+              }}>
                 {DAYS.map(d => (
-                  <Grid item xs key={d} sx={{ textAlign: 'center' }}>
-                    <Typography variant="caption" fontWeight={700} color="text.secondary">{d}</Typography>
-                  </Grid>
+                  <Box key={d} sx={{ textAlign: 'center', py: 0.5 }}>
+                    <Typography
+                      variant="caption"
+                      fontWeight={700}
+                      color="text.secondary"
+                      sx={{ fontSize: { xs: 11, md: 13 } }}
+                    >
+                      {d}
+                    </Typography>
+                  </Box>
                 ))}
-              </Grid>
+              </Box>
 
-              {/* Calendar grid */}
-              <Grid container>
+              {/* ── Fixed calendar grid ── */}
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: 0.5,
+              }}>
                 {/* Empty cells before first day */}
                 {Array.from({ length: firstDay }).map((_, i) => (
-                  <Grid item xs key={`empty-${i}`} sx={{ aspectRatio: '1', p: 0.3 }} />
+                  <Box key={`empty-${i}`} />
                 ))}
 
                 {/* Day cells */}
@@ -171,41 +186,48 @@ const SchoolCalendar = () => {
                   const dayEvts = getEventsForDay(day);
                   const hasEvents = dayEvts.length > 0;
                   const isHoliday = dayEvts.some(e => e.is_holiday);
-                  const today = isToday(day);
+                  const todayCell = isToday(day);
 
                   return (
-                    <Grid item xs key={day} sx={{ aspectRatio: '1', p: 0.3 }}>
-                      <Box
-                        onClick={() => handleDayClick(day)}
-                        sx={{
-                          height: '100%', minHeight: { xs: 36, md: 52 },
-                          borderRadius: 2, cursor: 'pointer', p: 0.5,
-                          bgcolor: today ? '#1a73e8' : isHoliday ? '#fce8e6' : hasEvents ? '#f0f7ff' : 'transparent',
-                          border: today ? 'none' : hasEvents ? '1px solid #e0e0e0' : '1px solid transparent',
-                          '&:hover': { bgcolor: today ? '#1557b0' : '#f0f0f0' },
-                          display: 'flex', flexDirection: 'column', alignItems: 'center',
-                        }}
+                    <Box
+                      key={day}
+                      onClick={() => handleDayClick(day)}
+                      sx={{
+                        minHeight: { xs: 40, md: 52 },
+                        borderRadius: 2,
+                        cursor: 'pointer',
+                        p: 0.5,
+                        bgcolor: todayCell ? '#1a73e8' : isHoliday ? '#fce8e6' : hasEvents ? '#f0f7ff' : 'transparent',
+                        border: todayCell ? 'none' : hasEvents ? '1px solid #e0e0e0' : '1px solid transparent',
+                        '&:hover': { bgcolor: todayCell ? '#1557b0' : '#f0f0f0' },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        fontWeight={todayCell ? 700 : 400}
+                        color={todayCell ? 'white' : isHoliday ? '#ea4335' : 'text.primary'}
+                        sx={{ fontSize: { xs: 11, md: 13 }, lineHeight: 1 }}
                       >
-                        <Typography variant="caption" fontWeight={today ? 700 : 400}
-                          color={today ? 'white' : isHoliday ? '#ea4335' : 'text.primary'}
-                          sx={{ fontSize: { xs: 11, md: 13 } }}>
-                          {day}
-                        </Typography>
-                        {hasEvents && !today && (
-                          <Box sx={{ display: 'flex', gap: 0.3, flexWrap: 'wrap', justifyContent: 'center', mt: 0.3 }}>
-                            {dayEvts.slice(0, 2).map((e, idx) => (
-                              <Box key={idx} sx={{
-                                width: 6, height: 6, borderRadius: '50%',
-                                bgcolor: eventTypeColors[e.event_type] || '#1a73e8'
-                              }} />
-                            ))}
-                          </Box>
-                        )}
-                      </Box>
-                    </Grid>
+                        {day}
+                      </Typography>
+                      {hasEvents && !todayCell && (
+                        <Box sx={{ display: 'flex', gap: 0.3, flexWrap: 'wrap', justifyContent: 'center', mt: 0.4 }}>
+                          {dayEvts.slice(0, 2).map((e, idx) => (
+                            <Box key={idx} sx={{
+                              width: 5, height: 5, borderRadius: '50%',
+                              bgcolor: eventTypeColors[e.event_type] || '#1a73e8'
+                            }} />
+                          ))}
+                        </Box>
+                      )}
+                    </Box>
                   );
                 })}
-              </Grid>
+              </Box>
 
               {/* Legend */}
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2, pt: 2, borderTop: '1px solid #f0f0f0' }}>
