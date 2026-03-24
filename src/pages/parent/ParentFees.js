@@ -42,12 +42,12 @@ const ParentFees = () => {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('Green Valley School', pageW / 2, 18, { align: 'center' });
+    doc.text('Apex Academy', pageW / 2, 18, { align: 'center' });
 
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.text('Nurturing Minds, Building Futures', pageW / 2, 26, { align: 'center' });
-    doc.text('Nagpur, Maharashtra  |  +91 94237 39041  |  info@greenvalley.edu', pageW / 2, 33, { align: 'center' });
+    doc.text('Nagpur, Maharashtra  |  +91 94237 39041  |  info@apexacademy.edu', pageW / 2, 33, { align: 'center' });
 
     // ── "FEE RECEIPT" title strip ─────────────────────────────────────────
     doc.setFillColor(240, 192, 64);         // gold
@@ -117,7 +117,7 @@ const ParentFees = () => {
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(120, 120, 120);
     doc.text('This is a computer-generated receipt and does not require a physical signature.', pageW / 2, y, { align: 'center' });
-    doc.text('For queries contact: accounts@greenvalley.edu  |  +91 94237 39041', pageW / 2, y + 6, { align: 'center' });
+    doc.text('For queries contact: accounts@apexacademy.edu  |  +91 94237 39041', pageW / 2, y + 6, { align: 'center' });
 
     // ── Authorised signature area ─────────────────────────────────────────
     y += 20;
@@ -133,7 +133,7 @@ const ParentFees = () => {
     doc.rect(0, doc.internal.pageSize.getHeight() - 10, pageW, 10, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(8);
-    doc.text('© 2026 Green Valley School — All Rights Reserved', pageW / 2, doc.internal.pageSize.getHeight() - 4, { align: 'center' });
+    doc.text('© 2026 Apex Academy — All Rights Reserved', pageW / 2, doc.internal.pageSize.getHeight() - 4, { align: 'center' });
 
     doc.save(`${fee.term.replace(/[\s()]/g, '_')}_Receipt.pdf`);
   };
